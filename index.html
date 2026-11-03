@@ -1,0 +1,1084 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Midterms 2026 Analysis Lab</title>
+<style>
+:root{
+  --bg:#eef0f5; --surface:#ffffff; --sunken:#e4e7ef; --ink:#191b29; --muted:#5a5f75; --line:#d6dae5; --tbd:#c3c8d6;
+  --dem:#2457d6; --dem-soft:#dde6fb; --rep:#cf3434; --rep-soft:#f8dfdf; --ind:#b9790b; --ind-soft:#f6ead2;
+  --accent:#5d3a9b; --accent-soft:#ebe4f6; --ok:#1d7a4b; --ok-soft:#dcf0e5; --warn:#a35a00;
+  --pa:#0f8a8a; --pb:#d9822b;
+  --f-display:"Avenir Next Condensed","Roboto Condensed","Arial Narrow","Segoe UI",Arial,sans-serif;
+  --f-body:system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono",monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#11121a; --surface:#1a1c28; --sunken:#232636; --ink:#e8e9f2; --muted:#9a9fb6; --line:#2f3245; --tbd:#474b61;
+  --dem:#6f97ff; --dem-soft:#1f2a4a; --rep:#ff6e6e; --rep-soft:#45222a; --ind:#e6b04a; --ind-soft:#3e321a;
+  --accent:#b994ee; --accent-soft:#2e2542; --ok:#5fcf93; --ok-soft:#183427; --warn:#f0a94a; --pa:#3cc4c4; --pb:#f0a35a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11121a; --surface:#1a1c28; --sunken:#232636; --ink:#e8e9f2; --muted:#9a9fb6; --line:#2f3245; --tbd:#474b61;
+  --dem:#6f97ff; --dem-soft:#1f2a4a; --rep:#ff6e6e; --rep-soft:#45222a; --ind:#e6b04a; --ind-soft:#3e321a;
+  --accent:#b994ee; --accent-soft:#2e2542; --ok:#5fcf93; --ok-soft:#183427; --warn:#f0a94a; --pa:#3cc4c4; --pb:#f0a35a; color-scheme:dark}
+
+*{box-sizing:border-box}
+html{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 60px}
+[hidden]{display:none!important}
+.wrap{max-width:1100px;margin:0 auto}
+h1,h2,h3{font-family:var(--f-display);font-weight:700;letter-spacing:.01em;text-wrap:balance;margin:0;line-height:1.08}
+h1{font-size:clamp(2rem,5vw,3.1rem);text-transform:uppercase}
+h2{font-size:1.6rem;text-transform:uppercase}
+h3{font-size:1.22rem}
+p{margin:0}
+a{color:var(--accent)}
+.muted{color:var(--muted)}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.eyebrow{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+header.mast{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between;padding-block:26px 16px;border-bottom:3px solid var(--ink)}
+.ballotline{display:flex;height:6px;margin-top:10px;border-radius:3px;overflow:hidden;max-width:360px}
+.ballotline span{flex:1}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;background:var(--sunken);font-size:.8rem;font-family:var(--f-mono)}
+.chip.live::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--rep)}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}
+
+nav.tabs{display:flex;gap:2px;margin-block:16px 22px;border-bottom:1px solid var(--line);overflow-x:auto;-webkit-overflow-scrolling:touch}
+nav.tabs a{flex:0 0 auto;text-decoration:none;border-bottom:3px solid transparent;padding:10px 12px;font-family:var(--f-display);font-size:1.08rem;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);white-space:nowrap}
+nav.tabs a .n{font-family:var(--f-mono);font-size:.72rem;margin-right:5px;opacity:.8}
+nav.tabs a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--accent)}
+nav.tabs a.done::after{content:" ✓";color:var(--ok)}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px}
+.stack{display:flex;flex-direction:column;gap:18px}
+.stack.tight{gap:10px}
+.row{display:flex;gap:14px;flex-wrap:wrap}
+.row>*{flex:1 1 220px;min-width:0}
+.cols2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+@media (max-width:820px){.cols2{grid-template-columns:minmax(0,1fr)}}
+.sec-head{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+.step{font-family:var(--f-mono);font-size:.8rem;color:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:0 6px}
+.hint{font-size:.88rem;color:var(--muted)}
+label.f{display:flex;flex-direction:column;gap:4px;font-weight:500;font-size:.92rem}
+input[type=text],select,textarea{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;width:100%}
+textarea{resize:vertical;min-height:130px;line-height:1.55}
+textarea.long{min-height:340px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:8px;padding:11px 18px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-weight:600;text-decoration:none;color:var(--ink);min-height:44px}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.btn.small{padding:6px 12px;font-size:.86rem;font-weight:500;min-height:36px}
+.btns{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.msg{font-size:.9rem;padding:9px 13px;border-radius:8px;background:var(--sunken)}
+.msg.err{background:var(--rep-soft)}
+.msg.ok{background:var(--ok-soft)}
+.msg.info{background:var(--accent-soft)}
+
+/* Start */
+.how{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;counter-reset:how}
+.how div{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font-size:.92rem}
+.how b{display:block;font-family:var(--f-display);font-size:1.1rem;text-transform:uppercase}
+.numpick{display:flex;gap:8px;flex-wrap:wrap}
+.numpick button{width:52px;height:52px;border-radius:10px;border:1px solid var(--line);background:var(--bg);font-family:var(--f-display);font-size:1.5rem;font-weight:700;cursor:pointer}
+.numpick button[aria-pressed="true"]{background:var(--accent);color:var(--surface);border-color:var(--accent)}
+
+/* Hub tiles */
+.hub{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.st-tile{display:flex;flex-direction:column;gap:8px;text-decoration:none;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;position:relative;min-height:170px}
+.st-tile:hover{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.st-tile .num{font-family:var(--f-display);font-size:2.6rem;font-weight:700;line-height:.9;color:var(--accent)}
+.st-tile .t{font-family:var(--f-display);font-size:1.25rem;font-weight:700;text-transform:uppercase;line-height:1.05}
+.st-tile .q{font-size:.88rem;color:var(--muted)}
+.st-tile .meta{margin-top:auto;display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-family:var(--f-mono);font-size:.7rem;padding:2px 7px;border-radius:4px;background:var(--sunken);color:var(--muted)}
+.tag.a{background:var(--accent);color:var(--surface)}
+.tag.b{background:var(--accent-soft);color:var(--accent)}
+.tag.done{background:var(--ok-soft);color:var(--ok)}
+.tag.extra{background:var(--ind-soft);color:var(--ind)}
+
+/* Station */
+.st-head{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 16px;align-items:end}
+.st-head .num{font-family:var(--f-display);font-size:4.2rem;font-weight:700;line-height:.85;color:var(--accent);grid-row:span 2}
+.lead{font-size:1.08rem;font-style:italic}
+.text p{margin-bottom:.8em;max-width:72ch}
+.text p:last-child{margin-bottom:0}
+.factbox{border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 8px 8px 0;font-size:.94rem}
+.voices{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.voice{border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--bg);display:flex;flex-direction:column;gap:8px;border-top:4px solid var(--muted)}
+.voice.R{border-top-color:var(--rep)} .voice.D{border-top-color:var(--dem)} .voice.N{border-top-color:var(--ind)}
+.voice q{font-size:1.02rem;font-style:italic;quotes:"“" "”"}
+.voice .who{font-size:.82rem;color:var(--muted)}
+.results-box{border:2px dashed var(--accent);border-radius:10px;padding:14px 16px;background:var(--surface)}
+.results-box.empty{color:var(--muted)}
+.sources{font-size:.84rem;color:var(--muted);padding-left:18px;margin:0}
+.sources li{margin-bottom:3px}
+details.wb{border:1px solid var(--line);border-radius:8px;padding:10px 14px;background:var(--bg)}
+details.wb summary{cursor:pointer;font-weight:600}
+dl.terms{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:6px 14px;margin:10px 0 0;font-size:.9rem}
+dl.terms dt{font-weight:600}
+dl.terms dd{margin:0;color:var(--muted)}
+@media (max-width:560px){dl.terms{grid-template-columns:minmax(0,1fr)} dl.terms dd{margin-bottom:6px}}
+
+/* Tasks */
+.tasks{display:flex;flex-direction:column;gap:10px}
+.task{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--bg);display:flex;flex-direction:column;gap:10px}
+.task.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);background:var(--surface)}
+.task .top{display:flex;gap:12px;align-items:flex-start}
+.task input[type=checkbox]{width:24px;height:24px;flex:0 0 auto;accent-color:var(--accent);margin-top:2px}
+.afb{font-family:var(--f-mono);font-size:.7rem;padding:2px 7px;border-radius:4px;white-space:nowrap}
+.afb.I{background:var(--sunken);color:var(--muted)} .afb.II{background:var(--dem-soft);color:var(--dem)} .afb.III{background:var(--accent-soft);color:var(--accent)}
+.wc{font-family:var(--f-mono);font-size:.76rem;color:var(--muted);text-align:right}
+.rule{display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:.9rem}
+.rule span{font-family:var(--f-mono);font-size:.8rem;padding:3px 9px;border-radius:999px;background:var(--sunken)}
+.rule span.ok{background:var(--ok-soft);color:var(--ok)}
+
+/* Charts */
+.chart{width:100%;overflow-x:auto}
+.chart svg{display:block;width:100%;height:auto}
+.chart svg text{fill:var(--muted);font-family:var(--f-mono);font-size:11px}
+.chart svg .strong{fill:var(--ink);font-weight:600}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.hbars{display:flex;flex-direction:column;gap:8px}
+.hb{display:grid;grid-template-columns:minmax(0,190px) minmax(0,1fr) 70px;gap:10px;align-items:center;font-size:.88rem}
+.hb .track{background:var(--sunken);border-radius:4px;height:20px;overflow:hidden}
+.hb .bar{height:100%;border-radius:4px;background:var(--accent)}
+.hb .v{font-family:var(--f-mono);font-size:.82rem;text-align:right}
+@media (max-width:560px){.hb{grid-template-columns:minmax(0,1fr) 64px}.hb .track{grid-column:1/-1;grid-row:2}}
+.tl{display:flex;flex-direction:column;gap:0;border-left:3px solid var(--line);margin-left:6px}
+.tl div{position:relative;padding:4px 0 12px 18px;font-size:.92rem}
+.tl div::before{content:"";position:absolute;left:-8px;top:9px;width:13px;height:13px;border-radius:50%;background:var(--surface);border:3px solid var(--accent)}
+.tl b{font-family:var(--f-mono);font-size:.78rem;display:block;color:var(--accent)}
+.big{font-family:var(--f-display);font-weight:700;font-size:2.2rem;line-height:1}
+input[type=range]{width:100%;accent-color:var(--accent);height:32px}
+.calc{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.calc .cell{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+th{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500}
+td.num,th.num{text-align:right;font-family:var(--f-mono)}
+
+/* Sorter / feed */
+.sorter{display:flex;flex-direction:column;gap:10px}
+.sort-item{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--bg);display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:.84rem;cursor:pointer;min-height:36px}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--surface);border-color:var(--accent)}
+.fb{font-size:.86rem;padding:6px 10px;border-radius:6px}
+.fb.ok{background:var(--ok-soft)} .fb.no{background:var(--rep-soft)}
+.post{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.post .acct{display:flex;gap:10px;align-items:center;font-size:.86rem}
+.post .av{width:34px;height:34px;border-radius:50%;background:var(--sunken);display:grid;place-items:center;font-weight:700;font-size:.8rem}
+.post .body{font-size:.95rem}
+.post .media{border-radius:8px;background:var(--sunken);padding:18px;text-align:center;font-size:.84rem;color:var(--muted)}
+
+/* Gerrymander */
+.gm{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;max-width:330px;width:100%;aspect-ratio:1}
+.gm button{border:0;border-radius:6px;position:relative;cursor:pointer;display:grid;place-items:center;padding:0}
+.gm .dot{width:42%;aspect-ratio:1;border-radius:50%;border:2px solid var(--surface)}
+.gm .lab{position:absolute;top:2px;left:4px;font-family:var(--f-mono);font-size:.66rem;color:var(--ink);opacity:.8}
+.brush{display:flex;gap:6px;flex-wrap:wrap}
+.brush button{min-width:44px;min-height:40px;border-radius:8px;border:2px solid transparent;font-weight:700;cursor:pointer}
+.brush button[aria-pressed="true"]{border-color:var(--ink)}
+
+/* Scales */
+.scale-item{display:flex;flex-direction:column;gap:8px;padding:12px 0;border-bottom:1px solid var(--line)}
+.likert{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.likert button{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 4px;font-size:.78rem;cursor:pointer;min-height:48px;line-height:1.2}
+.likert button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.shift{font-family:var(--f-mono);font-size:.8rem}
+
+/* Results */
+.chamber svg{width:100%;height:auto;display:block;max-width:380px;margin-inline:auto}
+.tally{display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:.9rem;gap:8px;flex-wrap:wrap}
+.tally .d{color:var(--dem)} .tally .r{color:var(--rep)} .tally .i{color:var(--ind)}
+.map svg{display:block;width:100%;height:auto;max-width:620px;margin-inline:auto}
+.map svg text{font-family:var(--f-mono);pointer-events:none}
+.ticker{display:flex;flex-direction:column;gap:8px;max-height:340px;overflow:auto}
+.ticker div{display:grid;grid-template-columns:56px minmax(0,1fr);gap:10px;font-size:.92rem;border-bottom:1px solid var(--line);padding-bottom:6px}
+.ticker b{font-family:var(--f-mono);font-size:.8rem;color:var(--rep)}
+.codebox{font-family:var(--f-mono);font-size:.76rem;word-break:break-all;background:var(--bg);border:1px dashed var(--accent);border-radius:8px;padding:10px;max-height:110px;overflow:auto;user-select:all}
+.pg{display:inline-flex;gap:4px;border-radius:5px;padding:3px 7px;font-family:var(--f-mono);font-size:.78rem;margin:2px}
+.pg.hit{background:var(--ok-soft);color:var(--ok)} .pg.miss{background:var(--rep-soft);color:var(--rep);text-decoration:line-through} .pg.open{background:var(--sunken);color:var(--muted)}
+
+/* Write */
+.wgrid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px;align-items:start}
+@media (max-width:900px){.wgrid{grid-template-columns:minmax(0,1fr)}}
+.phr{font-size:.86rem}
+.phr h4{margin:10px 0 4px;font-size:.8rem;font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.phr span{display:inline-block;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:3px 8px;margin:2px 2px 2px 0;cursor:pointer}
+.check label{display:flex;gap:10px;align-items:flex-start;font-size:.92rem;padding:4px 0}
+.check input{width:22px;height:22px;accent-color:var(--accent);flex:0 0 auto}
+.meter{height:8px;border-radius:4px;background:var(--sunken);overflow:hidden}
+.meter span{display:block;height:100%;background:var(--accent);transition:width .2s}
+
+.foot{margin-top:34px;font-size:.8rem;color:var(--muted);display:flex;flex-direction:column;gap:4px;border-top:1px solid var(--line);padding-top:14px}
+.nextbar{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="mast">
+    <div>
+      <div class="eyebrow">US Midterm Elections · 3 November 2026 · English Leistungsfach</div>
+      <h1>Midterms 2026 Analysis Lab</h1>
+      <div class="ballotline" aria-hidden="true"><span style="background:var(--dem)"></span><span style="background:var(--accent)"></span><span style="background:var(--rep)"></span></div>
+    </div>
+    <div class="btns">
+      <span class="chip" id="who"></span>
+      <span class="chip" id="rstatus"></span>
+    </div>
+  </header>
+  <nav class="tabs" id="nav" aria-label="Steps"></nav>
+  <main id="app"></main>
+  <footer class="foot">
+    <span>Guiding question: <b>Why did America vote the way it did – and what follows?</b></span>
+    <span>Your work is saved in this browser. Use your <b>save code</b> (step 6) to continue on another device. All figures carry a source; polls are estimates, not facts about individual voters.</span>
+  </footer>
+</div>
+
+<script src="results.js"></script>
+<script>
+"use strict";
+/* =========================================================
+   CONTENT
+   ========================================================= */
+const R = window.RESULTS || {status:"pending", notes:{}, races:{}, senate:{}, house:{}, exit:{groups:{},issues:[]}, ticker:[], governors:[]};
+
+const STATIONS = [
+{ id:"s1", num:1, short:"Referendum on Trump?", title:"A referendum on Trump?",
+  q:"Was 2026 a normal midterm – or a verdict on the President?", time:"20 min",
+  intro:`<p>Midterms are often called a <b>referendum on the President</b>: voters who are unhappy with the person in the White House use the only nationwide election available to them to send a message. History supports the idea. Since 1946 the President's party has lost House seats in almost every midterm, and the losses tend to grow as the President's popularity falls. In Gallup's figures, Presidents with a job approval above 50 per cent lost 14 House seats on average; Presidents below 50 per cent lost 37.</p>
+<p>By that measure, 2026 looked dangerous for the Republicans long before election day. In late October Donald Trump's approval stood at around 35 per cent in the PollCheck polling average, with more than six in ten Americans disapproving – the lowest point of his second term. Reuters/Ipsos measured 32 per cent a week before the vote.</p>
+<p>Trump's answer was to make the election <i>more</i> personal, not less. At the Republicans' first-ever midterm convention in Dallas in September 2026 he asked supporters to "pretend that I'm on the ballot". The calculation was about turnout: many Trump voters are irregular voters who come out for him but skip ordinary elections. Putting his name at the centre might mobilise them. The risk was obvious, too: it made it easier for Democrats to nationalise every race and turn hundreds of local contests into one vote on an unpopular President.</p>
+<p>Whether a midterm result is really a referendum remains contested. Political scientists also point to <b>"surge and decline"</b> (seats won on a President's coattails are hard to hold without him on the ballot), to the fact that the opposition is usually angrier and more motivated, and to voters who simply want a <b>check</b> on a President's power without rejecting his ideas. A lost majority, in other words, is not automatically a lost argument.</p>`,
+  fact:`<b>From your homework sheet:</b> the President's party lost House seats in 20 of the 22 midterms between 1938 and 2022 (Brookings). The two exceptions were 1998 and 2002.`,
+  voices:[
+    {p:"R", q:"I'm asking you to pretend that I'm on the ballot. Just one more time.", who:"Donald Trump, Republican midterm convention, Dallas, 9 Sept 2026", url:"https://www.ktvu.com/election/trump-republican-midterm-convention-dallas-texas-opening-night"},
+    {p:"R", q:"When he's not on the ballot, his people don't come and they don't vote.", who:"Donald Trump, speaking about himself at a rally, Sept 2026", url:"https://www.michiganpublic.org/2026-09-09/trump-once-again-urges-republicans-to-pretend-im-on-the-ballot-in-midterm-election"},
+    {p:"D", q:"Affordability.", who:"Politico's one-word summary of House Democratic leader Hakeem Jeffries' midterm pitch, July 2026 – Democrats tried to make the vote about prices, not only about Trump", url:"https://www.aljazeera.com/economy/2026/7/27/hakeem-jeffries-puts-affordability-at-centre-of-democrats-midterm-campaign"}
+  ],
+  sources:[
+    ["Gallup: Midterm seat loss averages 37 for unpopular Presidents (2018)","https://news.gallup.com/poll/242093/midterm-seat-loss-averages-unpopular-presidents.aspx"],
+    ["PollCheck: Trump approval average (27 Oct 2026)","https://www.pollcheck.co.uk/us-midterms-2026/approval"],
+    ["Ballotpedia News: Trump's average approval in September 2026","https://news.ballotpedia.org/2026/10/01/trump-saw-lowest-average-approval-rating-of-his-second-term-in-september/"],
+    ["KTVU/AP: 'Pretend I'm on the ballot' – Republican midterm convention","https://www.ktvu.com/election/trump-republican-midterm-convention-dallas-texas-opening-night"],
+    ["Brookings: What history tells us about the 2026 midterm elections (from your homework sheet)","https://www.brookings.edu/"]
+  ],
+  words:[["referendum on sb.","Abstimmung über jdn."],["job approval (rating)","Zustimmungswert"],["to nationalise a race","eine Wahl bundespolitisch aufladen"],["surge and decline","Mobilisierungs- und Rückgangseffekt"],["coattails","Zugkraft (eines Spitzenkandidaten)"],["irregular / low-propensity voter","Gelegenheitswähler(in)"],["a check on power","Kontrolle der Macht"],["to be under water","negative Zustimmungsbilanz haben"]],
+  tasks:[
+    {afb:"I", t:"Outline the historical pattern of midterm results for the President's party. Use two figures from the chart."},
+    {afb:"I", t:"Describe Trump's strategy of “pretend I'm on the ballot” and the reason he gave for it."},
+    {afb:"II", t:"Explain the link between presidential approval and seat losses. Use the slider to show what the historical trend line would predict for 2026, then compare it with the actual result."},
+    {afb:"II", t:"Analyse the risks and benefits of Trump's decision to make the midterms about himself – for him and for Republican candidates in swing districts."},
+    {afb:"III", t:"“The 2026 midterms were a referendum on Donald Trump.” Assess this claim. Consider at least one alternative explanation (e.g. surge and decline, the economy, the rules of the game)."},
+    {afb:"III", t:"Discuss whether a president who loses a midterm badly has lost the argument – or only the majority."}
+  ]},
+{ id:"s2", num:2, short:"It's the economy", title:"“It's the economy”",
+  q:"How much did prices decide this election?", time:"20 min",
+  intro:`<p>In 1992 Bill Clinton's campaign hung a sign in its headquarters: <i>“The economy, stupid.”</i> In 2026 the word every campaign used was <b>affordability</b>. In KFF's October poll, health-care costs and gas prices tied as voters' top economic worry; a quarter of voters said they were “very worried” about paying for each.</p>
+<p><b>Three developments shaped the cost-of-living debate.</b> First, the <b>2025 government shutdown</b> (1 October – 12 November 2025). At 43 days it was the longest in US history. Democrats refused to fund the government unless enhanced subsidies for health insurance under the Affordable Care Act (ACA, “Obamacare”) were extended. The shutdown ended without that extension, the subsidies expired on 31 December 2025, and premiums for unsubsidised benchmark plans rose by about 22 per cent.</p>
+<p>Second, <b>tariffs</b>. On 20 February 2026 the Supreme Court ruled 6–3 that the President could not impose his sweeping “Liberation Day” tariffs under an emergency law (IEEPA). The administration replaced them within days with a global tariff of 10, then 15 per cent under a different law, so prices did not fall quickly.</p>
+<p>Third, <b>the war with Iran</b>, which began with US and Israeli strikes on 28 February 2026. Fighting around the Strait of Hormuz pushed oil above $100 a barrel. Gas, which cost under $3 a gallon in February, reached a September average of $4.33 – a record for that month – and was still $4.23 a week before the vote. Trump called higher prices a price worth paying and admitted they might not come down before the midterms.</p>
+<p>Republicans answered with their 2025 tax law, branded the “Working Families Tax Cut”: no federal income tax on tips and overtime, an extra deduction for seniors. Democrats campaigned on lowering “groceries and gas and housing” and on health care, where KFF found voters trusted them almost two to one. Economists add a caveat both parties dislike: presidents control far less of the price level than campaigns suggest.</p>`,
+  fact:`<b>Trust on the issues (KFF, Oct 2026):</b> health-care costs – Democrats 42 %, Republicans 22 %; cost of living – Democrats 39 %, Republicans 25 %. The rest trusted neither or both.`,
+  voices:[
+    {p:"R", q:"People are pocketbook voters.", who:"John Thune, Republican Senate Majority Leader, 2026", url:"https://www.foxnews.com/politics/republicans-face-ticking-midterm-clock-iran-fallout-keeps-pressure-gas-prices"},
+    {p:"D", q:"We're focused on lowering the cost of groceries and gas and housing.", who:"Hakeem Jeffries, House Democratic leader, launching the “Affordable America” agenda, 26 July 2026", url:"https://abcnews.com/US/wireStory/house-democratic-leader-hakeem-jeffries-kicks-off-100-135095304"},
+    {p:"R", q:"Safer streets, more money in your pocket, and new opportunities for a better life.", who:"John Thune summing up the Republican message, Fox News interview", url:"https://www.foxnews.com/media/senate-majority-leader-john-thune-previews-republican-midterm-message-heading-2026"}
+  ],
+  sources:[
+    ["KFF poll: Cost of health care and gas top voters' midterm concerns (Oct 2026)","https://www.kff.org/public-opinion/poll-cost-of-health-care-and-gas-top-voters-midterm-concerns-democrats-hold-significant-advantage-on-health-care-costs-and-cost-of-living/"],
+    ["NPR/WYSO: Longest government shutdown in US history ends after 43 days","https://www.wyso.org/2025-11-13/longest-government-shutdown-in-u-s-history-ends-after-43-days"],
+    ["Healthcare Dive: Shutdown ends, ACA subsidies not extended","https://www.healthcaredive.com/news/government-shutdown-ends-aca-subsidies-not-extended/805329/"],
+    ["Newsweek / Urban Institute: affordability and ACA premiums","https://newsweek.com/affordability-could-decide-the-midterms-these-states-have-most-at-stake-12618489"],
+    ["Atlantic Council: What's next for US tariff policy after the Supreme Court ruling","https://www.atlanticcouncil.org/blogs/econographics/eight-questions-and-expert-answers-on-whats-next-for-us-tariff-policy/"],
+    ["AAA gas prices, October 2026","https://gasprices.aaa.com/2026/10/"],
+    ["PBS NewsHour: Rising gas prices frustrate voters; Trump on the cost of the Iran war","https://www.pbs.org/newshour/politics/rising-gas-prices-frustrate-voters-trump-says-its-an-inexpensive-price-to-pay-for-the-iran-war"]
+  ],
+  words:[["affordability","Bezahlbarkeit"],["cost of living","Lebenshaltungskosten"],["(health insurance) premium","Versicherungsbeitrag"],["subsidy / tax credit","Zuschuss / Steuergutschrift"],["government shutdown","Stillstand der Bundesverwaltung"],["tariff","Zoll"],["to pass sth. on to consumers","etw. an Verbraucher weitergeben"],["pocketbook voter","Wähler(in), der/die nach dem Geldbeutel entscheidet"]],
+  tasks:[
+    {afb:"I", t:"Summarise the three developments that shaped the cost-of-living debate in 2026."},
+    {afb:"I", t:"Use the gas calculator: how much more per year does a family that buys 15 gallons a week pay at October 2026 prices than in February 2026? Describe what that might mean for a household."},
+    {afb:"II", t:"Explain why the 2025 shutdown was still relevant for voters a year later."},
+    {afb:"II", t:"Compare the economic messages of Republicans and Democrats. Which voters was each message designed to reach?"},
+    {afb:"III", t:"“Presidents get the blame for prices they cannot control.” Assess this statement with reference to gas prices and tariffs in 2026."},
+    {afb:"III", t:"Evaluate whether “affordability” was a winning strategy for the Democrats. Use the results box below as evidence."}
+  ]},
+{ id:"s3", num:3, short:"Shifting coalitions", title:"Shifting coalitions",
+  q:"Lasting realignment – or just a protest vote?", time:"20 min",
+  intro:`<p>A party's <b>coalition</b> is the set of groups that reliably vote for it. In 2024 Donald Trump made striking gains among groups that had long leaned Democratic. According to AP VoteCast, Latino voters backed Kamala Harris by only 56 to 42 per cent, compared with 63 to 35 for Joe Biden in 2020; the shift was strongest among Latino men and voters without a college degree. Voters under 30 split 52 to 46 for Harris – far closer than in previous elections.</p>
+<p>The key question for 2026 was whether this was a <b>realignment</b> – a lasting change in party loyalty, as when white Southern voters moved from the Democrats to the Republicans over several decades – or a <b>protest vote</b> against the party in power during a period of high inflation, which could swing back just as quickly.</p>
+<p>Pre-election polls pointed to a swing back. An NBC News/Telemundo poll in October 2026 found Latino voters preferring Democratic control of Congress by 24 points, roughly double the margin in the same poll in 2024. The Harvard Youth Poll (fieldwork 30 September – 7 October) found Democrats ahead by 37 points among young people who said they would definitely vote. But the picture was not simply “coming home”: CBS News reported that many Latino voters had turned away from Trump without warming to the Democrats, and a New York Times/Siena poll found Latinos siding more with Republicans on the economy and crime. Among the young, only about a third said they would definitely vote, and just 15 per cent trusted the federal government – the lowest value in the poll's 26-year history.</p>
+<p><b>Suburban voters</b>, especially college-educated women, decide most competitive House districts. They powered the Democratic wave of 2018. Whether they did so again – and whether disappointed groups switched sides or simply stayed at home – is what exit polls can begin to tell us.</p>`,
+  fact:`<b>Persuasion vs. turnout:</b> a party can gain by changing voters' minds (persuasion) or by getting more of its own supporters to vote (mobilisation). A low-turnout midterm rewards the side whose voters are more motivated.`,
+  voices:[
+    {p:"N", para:1, q:"Analysts called Latino voters the most unpredictable swing voters of the cycle.", who:"Analysts' description of Latino voters before the midterms (CBS News, 2026)", url:"https://www.cbsnews.com/news/latino-voters-poll-trump-democrats-midterms-immigration/"},
+    {p:"D", para:1, q:"Democrats are counting on Latinos to “come home” in 2026 – but the picture is more complicated.", who:"Summary of a Cook Political Report analysis", url:"https://www.cookpolitical.com/analysis/national/national-politics/democrats-are-counting-latinos-come-home-2026-its-more"},
+    {p:"R", q:"Latino voters aren't moving in one direction – that's the 2026 wildcard.", who:"Headline, RedState (conservative), February 2026", url:"https://redstate.com/ben-smith/2026/02/15/latino-voters-arent-moving-in-one-direction-thats-the-2026-wildcard-n2199173"}
+  ],
+  sources:[
+    ["PBS NewsHour: How key groups voted in 2024, according to AP VoteCast","https://www.pbs.org/newshour/politics/interactive-how-key-groups-of-americans-voted-in-2024-according-to-ap-votecast"],
+    ["Axios: Latinos swing back toward Democrats (NBC/Telemundo poll, 5 Oct 2026)","https://www.axios.com/2026/10/05/latinos-democrats-trump"],
+    ["CBS News: Latino voters poll – Trump, Democrats, midterms","https://www.cbsnews.com/news/latino-voters-poll-trump-democrats-midterms-immigration/"],
+    ["Harvard Crimson: Harvard Youth Poll, fall 2026","https://thecrimson.com/article/2026/10/22/harvard-youth-poll-democrats-favored/"],
+    ["AS/COA: Poll tracker – the US Latino vote in the 2026 midterms","https://www.as-coa.org/articles/poll-tracker-us-latino-vote-2026-midterms"]
+  ],
+  words:[["coalition","Wählerbündnis, Wählerkoalition"],["realignment","dauerhafte Neuausrichtung"],["dealignment","Lösung von Parteibindungen"],["protest vote","Proteststimme"],["swing voter","Wechselwähler(in)"],["base","Stammwählerschaft"],["margin","Vorsprung"],["to stay at home","nicht wählen gehen"]],
+  tasks:[
+    {afb:"I", t:"Describe how Latino and young voters voted in 2024 compared with 2020."},
+    {afb:"I", t:"Outline what the pre-election polls of 2026 suggested about these two groups."},
+    {afb:"II", t:"Explain the difference between a realignment and a protest vote. Use the evidence sorter and justify two of your decisions."},
+    {afb:"II", t:"Compare 2024, the 2026 polls and the 2026 exit polls in the chart. Which group moved most – and in which direction?"},
+    {afb:"III", t:"“The Republican gains of 2024 were a protest against inflation, not a realignment.” Assess this claim in the light of the 2026 results."},
+    {afb:"III", t:"Discuss why it is risky for a party to assume that any group of voters “belongs” to it."}
+  ]},
+{ id:"s4", num:4, short:"The rules of the game", title:"The rules of the game",
+  q:"How much did the system shape the result?", time:"20 min",
+  intro:`<p>The House of Representatives is elected in 435 single-member districts: whoever gets the most votes wins the seat, and votes for the loser count for nothing. That makes the <b>shape of the districts</b> decisive. Drawing them so that one party wins more seats than its share of the vote is called <b>gerrymandering</b>. Two techniques are used: <b>packing</b> (squeezing the other side's voters into a few districts they win by huge margins) and <b>cracking</b> (spreading them thinly across many districts so they lose everywhere). Since the Supreme Court's 2019 ruling in <i>Rucho v. Common Cause</i>, federal courts no longer hear complaints about purely partisan gerrymanders.</p>
+<p>Normally districts are redrawn once a decade after the census. In 2025–26, however, a <b>mid-decade redistricting war</b> broke out. Texas went first in August 2025 with a map designed to create up to five additional Republican-leaning seats. California answered with Proposition 50 (approved 4 November 2025), which suspended its independent commission's map and created up to five Democratic-leaning seats. Missouri, North Carolina and Ohio followed for the Republicans, and in May 2026 Florida and Tennessee drew maps aimed at five more Republican seats; a court-ordered map in Utah created a Democratic-leaning seat in Salt Lake City, and Virginia's Democrats asked voters to approve a redraw. Before a single vote was cast, analysts estimated a net gain of roughly ten seats for the Republicans.</p>
+<p>The <b>Senate map</b> mattered as well. Only 35 of 100 seats were on the ballot – Republicans defended 22, Democrats 13 – and every state has two senators, whether it is Wyoming (under 600,000 people) or California (39 million). And there is <b>turnout</b>: only about half of eligible Americans voted in 2018, and 46 per cent in 2022. In a low-turnout election, the side that mobilises better can win without changing anybody's mind.</p>`,
+  fact:`<b>Why results take days:</b> states such as California, Arizona and Nevada count many mail ballots after election day. Close House races there are often not “called” until a week or more later.`,
+  voices:[
+    {p:"R", para:1, q:"Texas went first – and other Republican states followed, arguing they had to answer Democratic gerrymanders in Illinois and elsewhere.", who:"Summary of the Republican argument (Ballotpedia / AP coverage)", url:"https://ballotpedia.org/Redistricting_ahead_of_the_2026_elections"},
+    {p:"D", para:1, q:"Gavin Newsom framed Proposition 50 as fighting fire with fire: a temporary answer to Texas that expires after 2030.", who:"Summary of the Democratic argument (ABC7 coverage of Prop 50)", url:"https://abc7.com/post/governor-gavin-newsoms-trolling-president-donald-trump-attracts-attention-complicated-redistricting-fight/17616948/"},
+    {p:"N", para:1, q:"Same voters. Different lines. Different result.", who:"The logic of gerrymandering in one sentence – test it in the simulator", url:""}
+  ],
+  sources:[
+    ["Ballotpedia: Redistricting ahead of the 2026 elections","https://ballotpedia.org/Redistricting_ahead_of_the_2026_elections"],
+    ["Ballotpedia News: Florida and Tennessee maps aim to shift five more districts (May 2026)","https://news.ballotpedia.org/2026/05/11/new-congressional-maps-in-florida-tennessee-aim-to-shift-five-more-districts-to-republicans-ahead-of-2026-midterms/"],
+    ["Bloomberg Government: Redistricting reshapes contests for House control","https://news.bgov.com/bloomberg-government-news/bgov-onpoint-redistricting-reshapes-contests-for-house-control"],
+    ["PBS NewsHour: Where the state redistricting efforts stand","https://www.pbs.org/newshour/politics/midterm-redistricting-has-placed-millions-in-new-voting-districts-heres-where-6-state-efforts-stand"],
+    ["Rucho v. Common Cause (2019) – Oyez","https://www.oyez.org/cases/2018/18-422"]
+  ],
+  words:[["single-member district","Einerwahlkreis"],["first past the post","relatives Mehrheitswahlrecht"],["to gerrymander","Wahlkreise manipulativ zuschneiden"],["packing / cracking","Bündeln / Zersplittern (gegnerischer Wähler)"],["mid-decade redistricting","Neuzuschnitt mitten im Jahrzehnt"],["independent commission","unabhängige Kommission"],["wasted vote","verschenkte Stimme"],["to call a race","ein Rennen für entschieden erklären"]],
+  tasks:[
+    {afb:"I", t:"Outline which states redrew their maps before 2026 and which party each change was meant to help."},
+    {afb:"I", t:"Explain packing and cracking in your own words, using your result in the simulator."},
+    {afb:"II", t:"In the simulator, Party B wins three of five seats with 40 % of the voters. Explain how this is possible and why no rule was broken."},
+    {afb:"II", t:"Compare the estimated effect of redistricting (about ten seats) with the final House result. Could the maps alone have decided the majority?"},
+    {afb:"III", t:"“The 2026 result was decided by maps and turnout, not by voters' opinions.” Assess this claim."},
+    {afb:"III", t:"Who should draw electoral districts: state legislatures, independent commissions or courts? Evaluate two options and give your own position."}
+  ]},
+{ id:"s5", num:5, short:"The Republican case", title:"The Republican case",
+  q:"What worked for the GOP – and where did they hold or win?", time:"20 min",
+  intro:`<p>A fair analysis has to look at the winners' arguments as closely as the losers'. Republicans entered 2026 with three claims they considered strong. The first was the <b>border</b>. Border Patrol apprehensions at the south-western border fell from about 2.2 million in fiscal year 2022 to 237,565 in fiscal year 2025 – the lowest total since 1970 – and to about 99,000 in the fiscal year that ended in September 2026 (preliminary figures). Immigration, the issue that had helped Trump win in 2024, had turned from a problem into a record that Republicans could campaign on.</p>
+<p>The second was the <b>tax law</b> passed in July 2025, which Republicans branded the “Working Families Tax Cut”: it made the 2017 tax cuts permanent, removed federal income tax on tips and overtime (until 2028) and added a deduction for seniors. Party strategists advised candidates to talk about these popular measures – and about Democrats who had voted against them. Democrats answered that the same law cut Medicaid and called it the “Big, Ugly Bill”.</p>
+<p>The third was <b>money and organisation</b>: the main Republican Senate super PAC raised a record $272.9 million between July and September 2026, about $122 million more than its Democratic counterpart, and Elon Musk funded a large door-to-door field programme. Together with favourable new district maps and a Senate map in which most contested seats lay in states Trump had won, Republicans could hope to limit their losses even with an unpopular President.</p>
+<p>Not every Republican was equally strong, though. Candidate quality matters: a well-known incumbent with a local brand can outrun the national mood, while a controversial nominee can lose a seat the party “should” win. Look at the results box: where did Republicans hold on – and why there?</p>`,
+  fact:`<b>The Republican convention theme:</b> “the mainstream vs. the extreme” – presenting Democrats, not Republicans, as the risky choice (NPR, 9 Sept 2026).`,
+  voices:[
+    {p:"R", q:"Pretend that I'm on the ballot.", who:"Donald Trump's closing appeal, repeated at rallies through October 2026", url:"https://rollcall.com/factbase/trump/transcript/donald-trump-vlog-gop-get-out-and-vote-october-3-2026/"},
+    {p:"R", q:"A remarkable difference in just a year.", who:"John Thune at the southern border, launching the Republican 2026 campaign, January 2026", url:"https://www.foxnews.com/politics/republican-senators-hit-border-touting-tougher-security-tax-cuts-2026-kickoff"},
+    {p:"D", q:"Republicans will lose the majority in 2026 and the Big, Ugly Bill will be the reason why.", who:"Democratic Congressional Campaign Committee (DCCC), 2025", url:"https://www.axios.com/2025/07/03/nrcc-gop-ad-campaign-trump-reconciliation"}
+  ],
+  sources:[
+    ["Spectrum News / DHS: Apprehensions hit five-decade low in FY2025","https://spectrumnews1.com/ca/southern-california/news/2025/10/07/apprehensions-for-illegal-crossings-at-the-u-s--mexico-border-hits-more-than-five-decade-low-in-fiscal-year-2025"],
+    ["KSL / AP: Border apprehensions FY2022–2024","https://www.ksl.com/article/51386604"],
+    ["Voz / DHS: FY2026 preliminary border figures","https://voz.us/en/politics/261016/40031/dhs-reports-95-drop-in-arrests-at-the-southwest-border-in-2026.html"],
+    ["Fox News: Republican senators at the border tout security and tax cuts (Jan 2026)","https://www.foxnews.com/politics/republican-senators-hit-border-touting-tougher-security-tax-cuts-2026-kickoff"],
+    ["The New Republic: Senate Leadership Fund record quarter","https://newrepublic.com/post/216830/democrats-republicans-fundraising-campaign-spending-gap"],
+    ["NPR Illinois: Republicans say midterm is 'the mainstream vs the extreme'","https://www.nprillinois.org/2026-09-09/republicans-say-midterm-is-the-mainstream-vs-the-extreme-as-convention-kicks-off"]
+  ],
+  words:[["GOP (Grand Old Party)","Republikanische Partei"],["apprehension","Festnahme (an der Grenze)"],["fiscal year","Haushaltsjahr (1. Okt.–30. Sept.)"],["deduction","Steuerabzug, Freibetrag"],["candidate quality","Qualität der Kandidat(inn)en"],["incumbent","Amtsinhaber(in)"],["to outrun the national mood","besser abschneiden als der Bundestrend"],["field programme / ground game","Haustürwahlkampf"]],
+  tasks:[
+    {afb:"I", t:"Outline the three arguments Republicans considered their strongest in 2026."},
+    {afb:"I", t:"Describe the development of border apprehensions shown in the chart."},
+    {afb:"II", t:"Explain why a record that is clearly positive in the numbers (e.g. the border) may still not win an election."},
+    {afb:"II", t:"Analyse two Republican successes from the results box. What made the difference there: candidate, map, money or issue?"},
+    {afb:"III", t:"Write the strongest possible Republican interpretation of the 2026 result (5–7 sentences), then comment on how convincing it is."},
+    {afb:"III", t:"“Republicans did better than an unpopular President deserved.” Assess this statement."}
+  ]},
+{ id:"s6", num:6, short:"Social media", title:"Feeds, podcasts, influencers",
+  q:"How did politicians fight for attention online?", time:"20 min", extra:true,
+  intro:`<p>If 2024 was called the “podcast election”, commentators described 2026 as the <b>influencer election</b>. Campaigns know that many of the voters they need most avoid traditional news. They try to reach them “organically” – through creators, streamers and podcasters whom these voters already follow – instead of through paid adverts that people skip.</p>
+<p>Donald Trump set the tone. He speaks to his followers directly through his own platform, Truth Social, and in 2026 he recorded short campaign “vlogs” urging supporters to vote. Democrats, long accused of sounding like press releases, began to copy his style. The press office of California's governor Gavin Newsom started posting in Trump's all-caps tone, mocking the President with nicknames; according to CNN its follower count on X grew by 450 per cent within a few months. Critics called it undignified; Newsom said he was holding up a mirror to Trump.</p>
+<p>The money still mostly goes elsewhere: an industry projection put political ad spending in 2026 at $11.6 billion, with broadcast television taking almost half. But online campaigning raises new questions. There is no federal law requiring influencers to disclose that a campaign paid them for a post. AI-generated videos – some labelled, many not – circulated widely. And trust is low: in the Harvard Youth Poll only 15 per cent of young Americans said they trust the federal government to do the right thing most of the time.</p>
+<p>Supporters say social media lets candidates speak to voters directly, without gatekeepers. Critics answer that algorithms reward outrage over information and that unregulated paid content is advertising in disguise. Both can be true at once.</p>`,
+  fact:`<b>Try the Feed Lab below:</b> six invented posts (not real accounts) – identify the technique each one uses.`,
+  voices:[
+    {p:"R", q:"Whenever I'm on the ballot, we get 45% more votes.", who:"Donald Trump in a campaign vlog, 3 Oct 2026 (his own claim, not a verified figure)", url:"https://rollcall.com/factbase/trump/transcript/donald-trump-vlog-gop-get-out-and-vote-october-3-2026/"},
+    {p:"D", para:1, q:"Newsom said he imitates Trump online to hold a 'mirror up' to the President's 'madness'.", who:"Washington Examiner report on Gavin Newsom's press office", url:"https://www.washingtonexaminer.com/?p=3872052"},
+    {p:"N", para:1, q:"No federal law requires influencers to disclose payments from a campaign.", who:"ABC News report, July 2026 (as cited by Everything PR)", url:"https://everything-pr.com/midterm-campaign-communications"}
+  ],
+  sources:[
+    ["Boston Globe: Newsom's Trump-style social media strategy (2025)","https://www.bostonglobe.com/2025/08/15/nation/newsom-trump-social-media/"],
+    ["The Week: Newsom's Trump-style trolling roils critics while thrilling fans","https://theweek.com/politics/gavin-newsom-troll-trump-x"],
+    ["Washington Examiner: Campaigns reach for influencer megaphones","https://www.washingtonexaminer.com/?p=4491570"],
+    ["Everything PR: Midterm campaign communications (ad spending, disclosure)","https://everything-pr.com/midterm-campaign-communications"],
+    ["Harvard Crimson: Harvard Youth Poll, fall 2026","https://thecrimson.com/article/2026/10/22/harvard-youth-poll-democrats-favored/"]
+  ],
+  words:[["influencer / content creator","Influencer(in)"],["organic reach","unbezahlte Reichweite"],["to go viral","sich rasant verbreiten"],["algorithm","Algorithmus"],["engagement","Interaktion (Likes, Shares …)"],["to disclose","offenlegen"],["deepfake","KI-gefälschtes Video"],["gatekeeper","Torwächter (z. B. Redaktion)"]],
+  tasks:[
+    {afb:"I", t:"Describe how Trump and Newsom used social media in the 2026 campaign."},
+    {afb:"I", t:"Complete the Feed Lab and outline the six techniques in one sentence each."},
+    {afb:"II", t:"Explain why campaigns pay influencers instead of (or as well as) buying adverts."},
+    {afb:"II", t:"Analyse one of the Feed Lab posts in detail: target group, technique, intended effect."},
+    {afb:"III", t:"Should paid political posts by influencers have to be labelled? Discuss and take a position."},
+    {afb:"III", t:"“Social media made the 2026 campaign more democratic.” Assess this claim."}
+  ]},
+{ id:"s7", num:7, short:"Tech billionaires", title:"Follow the money: tech billionaires",
+  q:"Can money buy an election – or only attention?", time:"20 min", extra:true,
+  intro:`<p>Since the Supreme Court's 2010 ruling in <i>Citizens United v. FEC</i>, companies, unions and wealthy individuals may spend unlimited amounts on elections – as long as they do not coordinate directly with a candidate. The vehicles for this money are <b>super PACs</b>. According to Public Citizen's analysis of Federal Election Commission data, donors who gave at least $1 million provided about $4.2 billion to super PACs in the 2026 cycle – more than 70 per cent of their money.</p>
+<p>The tech industry became one of the biggest players. <b>Elon Musk</b>, once a Trump adviser, was the cycle's largest known donor. By mid-October he had spent roughly $366 million to help Republicans keep Congress, according to the New York Times – including $158 million for the main Republican Senate super PAC and $76 million for his own America PAC, which ran a door-to-door field programme in at least eight states.</p>
+<p>Whole industries organised as well. <b>Fairshake</b>, the super PAC network of the crypto industry, had spent more than $133 million in 2024 and held well over $150 million for 2026. Modelled on it, <b>Leading the Future</b> – backed with more than $100 million by the venture capital firm Andreessen Horowitz and OpenAI president Greg Brockman – supports candidates of <i>both</i> parties who oppose strict regulation of artificial intelligence; one of its first targets was a New York Democrat who had written an AI safety law. Meta set up super PACs of its own. Money also flowed the other way: billionaires such as Michael Bloomberg gave large sums to Democratic causes, and the Ripple co-founder Chris Larsen backed the same AI-safety candidate the AI industry attacked.</p>
+<p>Does the money work? Research suggests spending matters most in low-information races such as primaries and House seats, and less in high-profile contests where voters already know the candidates. Critics argue that the real effect is quieter: politicians know who can fund – or fund an opponent against – them.</p>`,
+  fact:`<b>Super PAC rules in one line:</b> unlimited money in, all donors disclosed (eventually) – unless the money passes through non-profit groups that do not name their donors (“dark money”).`,
+  voices:[
+    {p:"N", q:"Musk spends over $360m to help Republicans retain control of Congress.", who:"Headline, Business Day / Bloomberg, 12 Oct 2026", url:"https://www.businessday.co.za/world/americas/2026-10-12-musk-spends-over-360m-to-help-republicans-retain-control-of-congress/"},
+    {p:"N", q:"The 2026 midterms could decide AI's future – and Silicon Valley knows it.", who:"Headline, Built In", url:"https://builtin.com/artificial-intelligence/ai-super-pacs-2026-midterm-election-regulation"},
+    {p:"N", q:"Millionaires and billionaires fuel 2026 super PAC spending.", who:"Public Citizen (advocacy group for campaign finance reform)", url:"https://www.citizen.org/article/millionaires-and-billionaires-fuel-2026-super-pac-spending/"}
+  ],
+  sources:[
+    ["Business Day / Bloomberg: Musk spends over $360m (12 Oct 2026)","https://www.businessday.co.za/world/americas/2026-10-12-musk-spends-over-360m-to-help-republicans-retain-control-of-congress/"],
+    ["NBC News: AI, crypto and Trump super PACs stash millions for the midterms","https://www.nbcnews.com/politics/2026-election/ai-crypto-trump-super-pacs-stash-millions-spend-midterms-rcna256622"],
+    ["Public Citizen: Millionaires and billionaires fuel 2026 super PAC spending","https://www.citizen.org/article/millionaires-and-billionaires-fuel-2026-super-pac-spending/"],
+    ["Al Jazeera: Tracking the money – the biggest donors in the 2026 midterms","https://aljazeera.com/news/2026/10/27/tracking-the-money-the-biggest-donors-in-the-2026-us-midterm-elections"],
+    ["OpenSecrets: Outside spending (check current figures)","https://www.opensecrets.org/outside-spending"]
+  ],
+  words:[["super PAC","Wahlkampf-Unterstützungskomitee ohne Spendenobergrenze"],["campaign finance","Wahlkampffinanzierung"],["donor / megadonor","Spender(in) / Großspender(in)"],["to coordinate with sb.","sich mit jdm. absprechen"],["dark money","Geld aus nicht offengelegten Quellen"],["primary","Vorwahl"],["to regulate","regulieren"],["outside spending","Ausgaben Dritter"]],
+  tasks:[
+    {afb:"I", t:"Outline what super PACs are and where their money came from in 2026."},
+    {afb:"I", t:"Describe the largest donations shown in the chart."},
+    {afb:"II", t:"Explain why the AI and crypto industries support candidates from both parties."},
+    {afb:"II", t:"Compare Musk's role in 2026 with that of the industry PACs (Fairshake, Leading the Future). What different goals do they pursue?"},
+    {afb:"III", t:"“Unlimited political spending is free speech.” Discuss this view, referring to Citizens United."},
+    {afb:"III", t:"Assess, using the results box, whether money decided any of the races in 2026."}
+  ]}
+];
+
+const SCALES = [
+  {id:"q1", t:"The 2026 midterms were mainly a vote about Donald Trump."},
+  {id:"q2", t:"Prices mattered more to voters than any other issue."},
+  {id:"q3", t:"The US electoral system gives voters a fair chance to change who governs."},
+  {id:"q4", t:"Billionaires have too much influence on American elections."},
+  {id:"q5", t:"Social media makes American democracy stronger."},
+  {id:"q6", t:"The United States is more divided after these midterms than before."}
+];
+const LIKERT = ["strongly disagree","disagree","not sure","agree","strongly agree"];
+
+/* =========================================================
+   STATE
+   ========================================================= */
+const KEY = "ma26.state";
+const blank = () => ({v:1, n:"", a:null, b:null, c:null, t:{}, ans:{}, card:{}, sort:{}, feed:{}, gm:null, pre:{}, post:{}, change:"", wt:"comment", head:"", text:"", chk:{}, fc:""});
+const ls = { get(k,d){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch{ return d; } }, set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch{} } };
+let S = Object.assign(blank(), ls.get(KEY, {}));
+let saveT=null;
+function save(){ clearTimeout(saveT); saveT=setTimeout(()=>ls.set(KEY,S),250); }
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const words = s => (String(s||"").trim().match(/\S+/g) || []).length;
+const ST = id => STATIONS.find(s=>s.id===id);
+function b64enc(str){ const b=new TextEncoder().encode(str); let s=""; for(const x of b) s+=String.fromCharCode(x); return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); }
+function b64dec(t){ t=t.replace(/-/g,"+").replace(/_/g,"/"); while(t.length%4) t+="="; const s=atob(t); const b=new Uint8Array(s.length); for(let i=0;i<s.length;i++) b[i]=s.charCodeAt(i); return new TextDecoder().decode(b); }
+function copyText(text, el, ok){
+  const fb=()=>{ if(el) el.textContent="Copying is blocked here – select the text and copy it by hand."; };
+  try{ navigator.clipboard.writeText(text).then(()=>{ if(el) el.textContent=ok; }, fb); }catch{ fb(); }
+}
+const hasRes = () => R.status && R.status!=="pending";
+
+/* =========================================================
+   PROGRESS
+   ========================================================= */
+function stationStatus(id){
+  const sel=(S.t[id]||[]); const st=ST(id);
+  const n3=sel.filter(i=>st.tasks[i].afb==="III").length;
+  const answered=sel.filter(i=>words(S.ans[id+"_"+i])>=25).length;
+  return {sel:sel.length, n3, answered, done: sel.length===3 && n3>=1 && answered===3};
+}
+const myStations = () => [S.a,S.b,S.c].filter(Boolean);
+const doneScales = w => SCALES.every(q=>S[w][q.id]);
+const steps = [
+  {id:"start", n:"0", t:"Start"},
+  {id:"before", n:"1", t:"My view: before"},
+  {id:"results", n:"2", t:"What happened"},
+  {id:"stations", n:"3", t:"Stations"},
+  {id:"after", n:"4", t:"My view: after"},
+  {id:"write", n:"5", t:"Write"},
+  {id:"handin", n:"6", t:"Hand in"}
+];
+function stepDone(id){
+  if(id==="start") return !!(S.n && S.a);
+  if(id==="before") return doneScales("pre");
+  if(id==="stations") return !!(S.a && S.b && stationStatus(S.a).done && stationStatus(S.b).done);
+  if(id==="after") return doneScales("post");
+  if(id==="write") return words(S.text)>=250;
+  return false;
+}
+
+/* =========================================================
+   ROUTER
+   ========================================================= */
+function route(){
+  const h=(location.hash||"#start").slice(1);
+  const view = STATIONS.some(s=>s.id===h) ? h : (steps.some(s=>s.id===h)?h:"start");
+  const navId = view.startsWith("s") && ST(view) ? "stations" : view;
+  $("#nav").innerHTML = steps.map(s=>`<a href="#${s.id}" ${s.id===navId?'aria-current="page"':""} class="${stepDone(s.id)?"done":""}"><span class="n">${s.n}</span>${esc(s.t)}</a>`).join("");
+  $("#who").textContent = S.n ? `${S.n}${S.a?" · Station A: "+S.a.slice(1):""}` : "Not signed in";
+  $("#rstatus").textContent = hasRes() ? `Results: ${R.status==="final"?"final":"as of "+(R.asOf||"–")}` : "Results: coming 5 Nov";
+  $("#rstatus").className = "chip"+(hasRes()?" ok":" live");
+  const V = {start:vStart, before:()=>vScales("pre"), results:vResults, stations:vHub, after:()=>vScales("post"), write:vWrite, handin:vHandin};
+  $("#app").innerHTML = ST(view) ? vStation(ST(view)) : V[view]();
+  afterRender(view);
+  window.scrollTo(0,0);
+}
+window.addEventListener("hashchange", route);
+const next = (href,label) => `<div class="nextbar"><span></span><a class="btn primary" href="${href}">${label} →</a></div>`;
+
+/* =========================================================
+   VIEWS
+   ========================================================= */
+function vStart(){
+  return `<div class="stack">
+  <section class="panel stack">
+    <div class="sec-head"><span class="step">0</span><h2>Welcome to the lab</h2></div>
+    <p class="lead">Two days after the vote, the counting is (almost) over and the arguing begins. In this lab you work like a political analyst: you look at the results, become an expert on two explanations, and then write a comment of your own.</p>
+    <div class="how">
+      <div><b>1 · Your view</b>Six quick statements – what do you think <i>before</i> you start?</div>
+      <div><b>2 · What happened</b>Results map, seats, newsticker – and your own forecast from the Forecast Lab.</div>
+      <div><b>3 · Two stations</b>Station A (your number) + Station B (your choice). 3 tasks each from the pool.</div>
+      <div><b>4 · Your view again</b>Same statements – has your view changed?</div>
+      <div><b>5 · Write</b>A comment (or letter to the editor), 250–350 words.</div>
+      <div><b>6 · Hand in</b>Send everything by email in one tap.</div>
+    </div>
+    <p class="hint">Time: about 60–90 minutes. You can stop at any time – your work is saved in this browser, and your save code lets you continue on another device.</p>
+  </section>
+  <section class="panel stack">
+    <h3>About you</h3>
+    <label class="f">First name (appears on your hand-in)<input type="text" data-k="n" maxlength="40" value="${esc(S.n)}" placeholder="e.g. Mia" autocomplete="off"></label>
+    <div class="stack tight">
+      <span style="font-weight:500;font-size:.92rem">Your station number from your teacher (= Station A)</span>
+      <div class="numpick">${STATIONS.map(s=>`<button type="button" data-a="${s.id}" aria-pressed="${S.a===s.id}" title="${esc(s.title)}">${s.num}</button>`).join("")}</div>
+      <p class="hint" id="a-name">${S.a?`Station A: <b>${esc(ST(S.a).title)}</b>`:"Tap your number."}</p>
+    </div>
+  </section>
+  <section class="panel stack">
+    <h3>Continue on this device with a save code</h3>
+    <p class="hint">Started on another iPad? Paste your save code (it begins with <span class="mono">MA26.</span>).</p>
+    <div class="row"><textarea id="load-code" style="min-height:70px" placeholder="MA26.…"></textarea></div>
+    <div class="btns"><button class="btn" id="btn-load">Load my work</button><span id="load-msg" class="hint"></span></div>
+  </section>
+  ${next("#before","Start: my view")}
+  </div>`;
+}
+
+function vScales(w){
+  const after = w==="post";
+  return `<div class="stack"><section class="panel stack">
+    <div class="sec-head"><span class="step">${after?4:1}</span><h2>My view: ${after?"after":"before"}</h2></div>
+    <p>${after?"You have now looked at the results and at two explanations. Answer the same statements again – honestly, not strategically. Your earlier answer is shown as a small marker.":"Answer quickly and honestly. There are no right or wrong answers – you will see the same statements again at the end."}</p>
+    ${SCALES.map(q=>`<div class="scale-item"><b>${esc(q.t)}</b>
+      <div class="likert" role="radiogroup" aria-label="${esc(q.t)}">${LIKERT.map((l,i)=>`<button type="button" data-lk="${w}:${q.id}:${i+1}" aria-pressed="${S[w][q.id]===i+1}">${after&&S.pre[q.id]===i+1?"● ":""}${l}</button>`).join("")}</div>
+      ${after&&S.pre[q.id]&&S.post[q.id]?`<span class="shift">${shiftText(S.pre[q.id],S.post[q.id])}</span>`:""}
+    </div>`).join("")}
+    ${after?`<label class="f">Which statement did you change your mind on most (or least) – and why? 2–4 sentences.
+      <textarea data-k="change" style="min-height:110px">${esc(S.change)}</textarea></label><div class="wc" data-wc="change"></div>`:""}
+  </section>
+  ${after?next("#write","Write my comment"):next("#results","See what happened")}</div>`;
+}
+const shiftText=(a,b)=> a===b?"no change":(b>a?`moved towards agreement (+${b-a})`:`moved towards disagreement (−${a-b})`);
+
+/* ---------- Results ---------- */
+function vResults(){
+  const pending=!hasRes();
+  const sen=R.senate||{}, hou=R.house||{}, bef=R.before||{senate:{D:47,R:53},house:{D:214,R:219}};
+  const senC = pending ? {D:bef.senate.D,R:bef.senate.R,I:0,open:0} : {D:sen.D||0,R:sen.R||0,I:sen.I||0,open:sen.open||Math.max(0,100-(sen.D||0)-(sen.R||0)-(sen.I||0))};
+  const houC = pending ? {D:bef.house.D,R:bef.house.R,open:435-bef.house.D-bef.house.R} : {D:hou.D||0,R:hou.R||0,open:hou.open||Math.max(0,435-(hou.D||0)-(hou.R||0))};
+  return `<div class="stack">
+  <section class="panel stack">
+    <div class="sec-head"><span class="step">2</span><h2>What happened on 3 November</h2></div>
+    ${pending?`<div class="msg info"><b>Results are added on the morning of 5 November.</b> Until then you see the situation <i>before</i> the election.</div>`
+      :`<div class="msg ${R.status==="final"?"ok":"info"}">${R.status==="final"?"Final results":"Results as of "+esc(R.asOf)+". Races that are still being counted are shown in grey – “not yet called” is a result too."}</div>`}
+    <div class="cols2">
+      <div class="chamber stack tight"><div class="eyebrow">Senate · 100 seats · majority 51 (or 50 + VP)</div>${hemi([{k:"D",n:senC.D},{k:"I",n:senC.I},{k:"tbd",n:senC.open},{k:"R",n:senC.R}],5,340)}
+        <div class="tally"><span class="d">D ${senC.D}</span>${senC.I?`<span class="i">I ${senC.I}</span>`:""}${senC.open?`<span class="muted">open ${senC.open}</span>`:""}<span class="r">R ${senC.R}</span></div>
+        <p class="hint">${pending?"Before the election (Democrats incl. two independents).":"After the election."}</p></div>
+      <div class="chamber stack tight"><div class="eyebrow">House · 435 seats · majority 218</div>${hemi([{k:"D",n:houC.D},{k:"tbd",n:houC.open},{k:"R",n:houC.R}],11,340)}
+        <div class="tally"><span class="d">D ${houC.D}</span>${houC.open?`<span class="muted">open ${houC.open}</span>`:""}<span class="r">R ${houC.R}</span></div>
+        <p class="hint">${pending?"Before the election (2 seats vacant).":"After the election."}</p></div>
+    </div>
+  </section>
+  <section class="panel stack">
+    <h3>The 11 Senate battlegrounds</h3>
+    <div class="map">${resultMap()}</div>
+    <div class="legend" style="justify-content:center"><span><i style="background:var(--dem)"></i>Democrat</span><span><i style="background:var(--ind)"></i>Independent</span><span><i style="background:var(--rep)"></i>Republican</span><span><i style="background:var(--surface);border:1px dashed var(--muted)"></i>not called yet</span></div>
+  </section>
+  <div class="cols2">
+    <section class="panel stack"><h3>Newsticker</h3>
+      ${R.ticker&&R.ticker.length?`<div class="ticker">${R.ticker.map(x=>`<div><b>${esc(x.t)}</b><span>${x.text}</span></div>`).join("")}</div>`:`<p class="hint">The ticker fills up on the morning of 5 November.</p>`}
+    </section>
+    <section class="panel stack"><h3>Governors</h3>
+      ${R.governors&&R.governors.length?`<div class="tbl-wrap"><table><thead><tr><th>State</th><th>Winner</th><th></th></tr></thead><tbody>${R.governors.map(g=>`<tr><td>${esc(g.st)}</td><td style="color:${g.winner?pv(g.winner):"var(--muted)"}">${g.winner?esc(g.name)+" ("+g.winner+")":"not called"}</td><td>${g.flip?'<span class="tag extra">flip</span>':""}</td></tr>`).join("")}</tbody></table></div>`:`<p class="hint">36 states elected a governor. Key races are added on 5 November.</p>`}
+    </section>
+  </div>
+  <section class="panel stack">
+    <h3>How good was your forecast?</h3>
+    <p>Paste the code you created in the <a href="https://makrahl.github.io/midterms-2026/" target="_blank" rel="noopener">Forecast Lab</a> before the election (it starts with <span class="mono">MT26.</span>).</p>
+    <textarea data-k="fc" style="min-height:70px" placeholder="MT26.…">${esc(S.fc)}</textarea>
+    <div id="fc-out"></div>
+  </section>
+  ${R.sources&&R.sources.length?`<section class="panel"><h3>Sources for the results</h3><ul class="sources">${R.sources.map(s=>`<li><a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.t)}</a></li>`).join("")}</ul></section>`:""}
+  ${next("#stations","Go to the stations")}
+  </div>`;
+}
+
+/* Forecast Lab compatibility (same race list and code format) */
+const RACES = [
+  {id:"AK", st:"Alaska", c:{D:"Mary Peltola", R:"Dan Sullivan"}},
+  {id:"GA", st:"Georgia", c:{D:"Jon Ossoff", R:"Mike Collins"}},
+  {id:"IA", st:"Iowa", c:{D:"Josh Turek", R:"Ashley Hinson"}},
+  {id:"KS", st:"Kansas", c:{D:"Adam Hamilton", R:"Roger Marshall"}},
+  {id:"ME", st:"Maine", c:{D:"Troy Jackson", R:"Susan Collins"}},
+  {id:"MI", st:"Michigan", c:{D:"Abdul El-Sayed", R:"Mike Rogers"}},
+  {id:"NE", st:"Nebraska", c:{I:"Dan Osborn", R:"Pete Ricketts"}},
+  {id:"NH", st:"New Hampshire", c:{D:"Chris Pappas", R:"John E. Sununu"}},
+  {id:"NC", st:"North Carolina", c:{D:"Roy Cooper", R:"Michael Whatley"}},
+  {id:"OH", st:"Ohio", c:{D:"Sherrod Brown", R:"Jon Husted"}},
+  {id:"TX", st:"Texas", c:{D:"James Talarico", R:"Ken Paxton"}}
+];
+const RACE_BY = Object.fromEntries(RACES.map(r=>[r.id,r]));
+function decodeForecast(text){
+  const m=String(text).replace(/\s+/g,"").match(/MT26\.([A-Za-z0-9_-]+)/); if(!m) return null;
+  let chunk=m[1];
+  for(let len=chunk.length; len>8; len--){ try{ const o=JSON.parse(b64dec(chunk.slice(0,len))); if(o && o.v===1 && typeof o.s==="object") return o; }catch{} }
+  return null;
+}
+function forecastHTML(){
+  const p=decodeForecast(S.fc);
+  if(!S.fc.trim()) return "";
+  if(!p) return `<div class="msg err">This does not look like a Forecast Lab code. It starts with “MT26.”</div>`;
+  const picks=RACES.map(r=>{ const v=p.s?.[r.id], w=R.races?.[r.id]; const cls=!w?"open":(v===w?"hit":"miss"); return `<span class="pg ${cls}">${r.id} ${v||"–"}</span>`; }).join("");
+  const called=RACES.filter(r=>R.races?.[r.id]); const right=called.filter(r=>p.s?.[r.id]===R.races[r.id]).length;
+  const hD = typeof R.house?.D==="number" && R.status!=="pending" ? R.house.D : null;
+  return `<div class="stack tight"><p><b>${esc(p.n||"Your")}</b> forecast · House: <span class="mono">D ${p.h}</span>${hD!=null?` · result so far: <span class="mono">D ${hD}</span> (difference ${Math.abs(p.h-hD)})`:""}</p>
+    <div>${picks}</div>
+    <p class="hint">${called.length?`Senate battlegrounds called so far: ${called.length} of 11 – you got <b>${right}</b> right.`:"No battleground race has been called yet – the comparison appears with the results."}</p>
+    ${p.r?`<p class="hint">Your reasoning on election day: <i>“${esc(p.r.slice(0,300))}${p.r.length>300?"…":""}”</i> – does it still hold?</p>`:""}</div>`;
+}
+
+/* ---------- Hub ---------- */
+function vHub(){
+  const tile=s=>{ const st=stationStatus(s.id); const role = S.a===s.id?'<span class="tag a">Station A</span>':(S.b===s.id?'<span class="tag b">Station B</span>':(S.c===s.id?'<span class="tag b">extra</span>':""));
+    return `<a class="st-tile" href="#${s.id}"><span class="num">${s.num}</span><span class="t">${esc(s.title)}</span><span class="q">${esc(s.q)}</span>
+    <span class="meta">${role}${st.done?'<span class="tag done">✓ done</span>':(st.sel?`<span class="tag">${st.answered}/3 answered</span>`:"")}<span class="tag">${s.time}</span>${s.extra?'<span class="tag extra">bonus topic</span>':""}</span></a>`; };
+  return `<div class="stack"><section class="panel stack">
+    <div class="sec-head"><span class="step">3</span><h2>Expert stations</h2></div>
+    <p><b>Your task:</b> work through <b>Station A</b> (your number) and <b>one more station of your choice</b> (Station B). A third station is optional. In each station, choose <b>3 tasks</b> from the pool – <b>at least one from AFB III</b> – and answer each in at least 25 words.</p>
+    ${!S.a?`<div class="msg err">You have not chosen Station A yet. <a href="#start">Go to Start</a>.</div>`:""}
+  </section>
+  <div class="hub">${STATIONS.map(tile).join("")}</div>
+  ${next("#after","My view: after")}</div>`;
+}
+
+/* ---------- Station ---------- */
+function vStation(s){
+  const st=stationStatus(s.id); const sel=S.t[s.id]||[];
+  const role = S.a===s.id?"A":(S.b===s.id?"B":(S.c===s.id?"C":null));
+  const canB = !role && S.a && !S.b, canC = !role && S.a && S.b && !S.c;
+  return `<div class="stack">
+  <section class="panel stack">
+    <div class="st-head"><span class="num">${s.num}</span><div class="eyebrow">Expert station ${s.num} · ${s.time}${s.extra?" · bonus topic":""}</div><h2>${esc(s.title)}</h2></div>
+    <p class="lead">${esc(s.q)}</p>
+    <div class="btns">${role?`<span class="tag a">This is your Station ${role}</span>`:""}
+      ${canB?`<button class="btn small" data-role="b:${s.id}">Make this my Station B</button>`:""}
+      ${canC?`<button class="btn small" data-role="c:${s.id}">Add as extra station</button>`:""}
+      ${role&&role!=="A"?`<button class="btn small" data-role="x:${s.id}">Remove from my stations</button>`:""}
+      <a class="btn small" href="#stations">← All stations</a></div>
+  </section>
+  <section class="panel stack"><h3>Background</h3><div class="text">${s.intro}</div><div class="factbox">${s.fact}</div></section>
+  <section class="panel stack" id="viz-${s.id}"></section>
+  <section class="panel stack"><h3>Voices</h3><div class="voices">${s.voices.map(v=>`<div class="voice ${v.p}">${v.para?`<p><span class="tag">summary</span> ${esc(v.q)}</p>`:`<q>${esc(v.q)}</q>`}<span class="who">${esc(v.who)}${v.url?` · <a href="${esc(v.url)}" target="_blank" rel="noopener">source</a>`:""}</span></div>`).join("")}</div>
+    <p class="hint">Red = Republican side, blue = Democratic side, gold = neutral / media. Quotation marks = exact words; “summary” = paraphrase of a source.</p></section>
+  <section class="panel stack"><h3>What the results say</h3>${R.notes&&R.notes[s.id]?`<div class="results-box">${R.notes[s.id]}</div>`:`<div class="results-box empty">This box is filled in with the election results on the morning of 5 November.</div>`}</section>
+  <section class="panel stack">
+    <div class="sec-head"><h3>Task pool</h3></div>
+    <div class="rule"><span class="${sel.length===3?"ok":""}">${sel.length}/3 chosen</span><span class="${st.n3>=1?"ok":""}">AFB III: ${st.n3>=1?"✓":"missing"}</span><span class="${st.answered===3?"ok":""}">${st.answered}/3 answered (25+ words)</span></div>
+    <div class="tasks">${s.tasks.map((t,i)=>{ const on=sel.includes(i); const k=s.id+"_"+i; return `<div class="task ${on?"on":""}">
+      <label class="top"><input type="checkbox" data-task="${s.id}:${i}" ${on?"checked":""} ${!on&&sel.length>=3?"disabled":""}><span class="afb ${t.afb}">AFB ${t.afb}</span><span>${esc(t.t)}</span></label>
+      ${on?`<textarea data-k="ans.${k}" placeholder="Your answer in English …">${esc(S.ans[k]||"")}</textarea><div class="wc" data-wc="ans.${k}"></div>`:""}
+    </div>`; }).join("")}</div>
+  </section>
+  <section class="panel stack"><h3>Expert card: three take-aways</h3>
+    <p class="hint">Three sentences you would tell someone who did not do this station. You will use them in your comment.</p>
+    ${[0,1,2].map(i=>`<input type="text" data-k="card.${s.id}_${i}" value="${esc(S.card[s.id+"_"+i]||"")}" placeholder="Take-away ${i+1}">`).join("")}
+  </section>
+  <section class="panel stack"><h3>Sources</h3><ul class="sources">${s.sources.map(([t,u])=>`<li><a href="${esc(u)}" target="_blank" rel="noopener">${esc(t)}</a></li>`).join("")}</ul>
+    <details class="wb"><summary>Word bank (${s.words.length} terms)</summary><dl class="terms">${s.words.map(([e,d])=>`<dt>${esc(e)}</dt><dd>${esc(d)}</dd>`).join("")}</dl></details>
+  </section>
+  <div class="nextbar"><a class="btn" href="#stations">← All stations</a>${st.done?`<a class="btn primary" href="${S.a&&S.b&&stationStatus(S.a).done&&stationStatus(S.b).done?"#after":"#stations"}">Next →</a>`:""}</div>
+  </div>`;
+}
+
+/* ---------- Write ---------- */
+const PHRASES = {
+  "Opening":["Two days after the midterms, one question dominates:","Few expected that …","At first sight, the result suggests … – but a closer look reveals …"],
+  "Thesis":["In my view, the result is best explained by …","I would argue that … rather than …","The key to understanding the result is …"],
+  "Evidence":["According to …, …","This is borne out by the fact that …","A telling example is …","The figures speak for themselves: …"],
+  "Conceding":["Admittedly, …","It would be naive to deny that …","Critics may object that … However, …","While it is true that …, …"],
+  "Concluding":["All things considered, …","What follows from this is …","The real lesson of 2026 may be that …","Whether … remains to be seen, but …"]
+};
+function vWrite(){
+  const w=words(S.text); const pct=Math.min(100,w/350*100);
+  const chk=[["head","A headline that makes readers curious"],["thesis","A clear thesis in the first paragraph"],["ev","At least two pieces of evidence, each with its source"],["stations","Evidence from both of my stations"],["counter","A counter-argument that I take seriously and answer"],["concl","A conclusion that answers “what follows?”"],["reg","Formal register: no contractions, no “I think” in every sentence"]];
+  return `<div class="stack"><section class="panel stack">
+    <div class="sec-head"><span class="step">5</span><h2>Write</h2></div>
+    <div class="seg" role="radiogroup" aria-label="Text type">
+      <button type="button" data-wt="comment" aria-pressed="${S.wt==="comment"}">Comment (op-ed)</button>
+      <button type="button" data-wt="letter" aria-pressed="${S.wt==="letter"}">Letter to the editor</button>
+    </div>
+    ${S.wt==="comment"?`<div class="factbox"><b>Task:</b> An English-language news website for young Europeans asks for opinion pieces on the question <b>“Why did America vote the way it did – and what follows?”</b> Write a comment of <b>250–350 words</b>. Use evidence from both of your stations and refer to the results.</div>`
+     :`<div class="factbox"><b>Task:</b> A newspaper columnist wrote after the election: <i>“The midterms were decided by money and maps, not by voters.”</i> (prompt written for this lab). Write a <b>letter to the editor</b> of <b>250–350 words</b> in which you respond to this claim. Use evidence from both of your stations and refer to the results.</div>`}
+    <div class="wgrid">
+      <div class="stack tight">
+        <input type="text" data-k="head" value="${esc(S.head)}" placeholder="${S.wt==="comment"?"Headline":"Subject line, e.g. Re: “Money and maps, not voters” (6 Nov)"}">
+        <textarea class="long" data-k="text" placeholder="${S.wt==="comment"?"Your comment …":"Sir or Madam, …"}">${esc(S.text)}</textarea>
+        <div class="meter"><span id="wmeter" style="width:${pct}%"></span></div>
+        <div class="wc" data-wc="text"></div>
+      </div>
+      <aside class="stack tight">
+        <details class="wb" open><summary>Your expert cards</summary><div class="phr">${myStations().map(id=>`<h4>${esc(ST(id).title)}</h4>${[0,1,2].map(i=>S.card[id+"_"+i]?`<p>• ${esc(S.card[id+"_"+i])}</p>`:"").join("")||'<p class="hint">empty</p>'}`).join("")||'<p class="hint">Choose your stations first.</p>'}</div></details>
+        <details class="wb"><summary>Useful phrases (tap to copy)</summary><div class="phr">${Object.entries(PHRASES).map(([k,a])=>`<h4>${k}</h4>${a.map(p=>`<span data-phrase="${esc(p)}">${esc(p)}</span>`).join("")}`).join("")}<p class="hint" id="ph-msg"></p></div></details>
+        <details class="wb" open><summary>Structure</summary><div class="phr"><p>1 · Headline + hook<br>2 · Thesis<br>3 · Argument 1 (Station A) + evidence<br>4 · Argument 2 (Station B) + evidence<br>5 · Counter-argument + rebuttal<br>6 · Conclusion: what follows?</p></div></details>
+      </aside>
+    </div>
+  </section>
+  <section class="panel stack check"><h3>Checklist before you hand in</h3>
+    ${chk.map(([k,t])=>`<label><input type="checkbox" data-chk="${k}" ${S.chk[k]?"checked":""}><span>${t}</span></label>`).join("")}
+  </section>
+  ${next("#handin","Hand in")}</div>`;
+}
+
+/* ---------- Hand in ---------- */
+function exportText(withCode=true){
+  const L=[]; const line=()=>L.push("");
+  L.push(`MIDTERMS 2026 ANALYSIS LAB – ${S.n||"(no name)"}`); L.push(`Exported: ${new Date().toLocaleString("en-GB")}`); line();
+  L.push("== MY VIEW: BEFORE → AFTER (1 = strongly disagree … 5 = strongly agree) ==");
+  SCALES.forEach(q=>L.push(`- ${q.t}  ${S.pre[q.id]||"–"} → ${S.post[q.id]||"–"}`));
+  if(S.change.trim()){ L.push("Why my view changed / did not change:"); L.push(S.change.trim()); }
+  line();
+  [["A",S.a],["B",S.b],["extra",S.c]].forEach(([r,id])=>{ if(!id) return; const s=ST(id);
+    L.push(`== STATION ${r}: ${s.num} ${s.title.toUpperCase()} ==`);
+    (S.t[id]||[]).forEach(i=>{ L.push(`[AFB ${s.tasks[i].afb}] ${s.tasks[i].t}`); L.push((S.ans[id+"_"+i]||"").trim()||"(no answer)"); line(); });
+    const cards=[0,1,2].map(i=>S.card[id+"_"+i]).filter(Boolean); if(cards.length){ L.push("Expert card:"); cards.forEach(c=>L.push("• "+c)); }
+    line(); });
+  L.push(`== ${S.wt==="comment"?"COMMENT":"LETTER TO THE EDITOR"} (${words(S.text)} words) ==`);
+  if(S.head.trim()) L.push(S.head.trim()); L.push(S.text.trim()||"(not written yet)"); line();
+  if(withCode){ L.push("== SAVE CODE (to continue later) =="); L.push(saveCode()); }
+  return L.join("\n");
+}
+const saveCode = () => "MA26." + b64enc(JSON.stringify(S));
+function decodeSave(text){
+  const m=String(text).replace(/\s+/g,"").match(/MA26\.([A-Za-z0-9_-]+)/); if(!m) return null;
+  for(let len=m[1].length; len>8; len--){ try{ const o=JSON.parse(b64dec(m[1].slice(0,len))); if(o && o.v===1) return o; }catch{} }
+  return null;
+}
+function vHandin(){
+  const miss=[]; if(!S.n) miss.push("your name"); if(!doneScales("pre")) miss.push("“My view: before”");
+  if(!(S.a&&stationStatus(S.a).done)) miss.push("Station A (3 tasks incl. AFB III, 25+ words each)");
+  if(!(S.b&&stationStatus(S.b).done)) miss.push("Station B");
+  if(!doneScales("post")) miss.push("“My view: after”"); if(words(S.text)<250) miss.push(`your text (${words(S.text)}/250 words)`);
+  return `<div class="stack"><section class="panel stack">
+    <div class="sec-head"><span class="step">6</span><h2>Hand in</h2></div>
+    ${miss.length?`<div class="msg err"><b>Still missing:</b> ${miss.map(esc).join(" · ")}</div>`:`<div class="msg ok"><b>Everything is complete.</b> Send it to your teacher.</div>`}
+    <p>Tap <b>Open email</b>: your mail app opens with all your answers. Enter your teacher's email address and send. If the email is cut off or the button does not work, use <b>Copy my answers</b> and paste everything into an email.</p>
+    <div class="btns"><a class="btn primary" id="btn-mail" href="#">✉ Open email</a><button class="btn" id="btn-copyall">Copy my answers</button><span id="copy-msg" class="hint"></span></div>
+  </section>
+  <section class="panel stack"><h3>Preview</h3><pre id="preview" style="white-space:pre-wrap;font-family:var(--f-mono);font-size:.8rem;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px;max-height:420px;overflow:auto;margin:0"></pre></section>
+  <section class="panel stack"><h3>Your save code</h3><p class="hint">Copy this code to continue on another device (Start → “Continue with a save code”). It contains all your answers.</p>
+    <div class="codebox" id="savecode"></div><div class="btns"><button class="btn small" id="btn-copycode">Copy save code</button><span id="code-msg" class="hint"></span></div>
+    <details class="wb"><summary>Start again from scratch</summary><p class="hint" style="margin:8px 0">Deletes everything on this device. Copy your save code first!</p><button class="btn small" id="btn-reset" style="color:var(--rep)">Delete my work on this device</button></details>
+  </section></div>`;
+}
+
+/* =========================================================
+   CHARTS & INTERACTIVES
+   ========================================================= */
+const pv = k => k==="D"?"var(--dem)":k==="R"?"var(--rep)":k==="I"?"var(--ind)":"var(--tbd)";
+function hemi(groups, rows, w){
+  const n = groups.reduce((a,g)=>a+g.n,0);
+  const pad=6, Rr=w/2-pad, r0=Rr*0.36, cx=w/2, cy=Rr+pad;
+  const radii=[]; for(let i=0;i<rows;i++) radii.push(r0+(Rr-r0)*i/(rows-1));
+  const sumR=radii.reduce((a,b)=>a+b,0);
+  const counts=radii.map(r=>Math.round(n*r/sumR)); counts[rows-1]+=n-counts.reduce((a,b)=>a+b,0);
+  const gap=(Rr-r0)/(rows-1); const pts=[]; let dotR=Infinity;
+  radii.forEach((rad,i)=>{ const k=counts[i]; dotR=Math.min(dotR, Math.PI*rad/Math.max(1,k-1)*0.42);
+    for(let j=0;j<k;j++){ const a = k===1?Math.PI/2:Math.PI*(1-j/(k-1)); pts.push({a, x:cx+rad*Math.cos(a), y:cy-rad*Math.sin(a)}); } });
+  dotR=Math.min(dotR,gap*0.42); pts.sort((p,q)=>q.a-p.a);
+  let idx=0, out="";
+  for(const g of groups) for(let j=0;j<g.n;j++){ const p=pts[idx++]; if(!p) break; out+=`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${dotR.toFixed(2)}" fill="${pv(g.k)}"/>`; }
+  const h=Math.ceil(cy+dotR+3);
+  return `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="${groups.map(g=>g.n+" "+g.k).join(", ")}">${out}<line x1="${cx}" y1="${pad-2}" x2="${cx}" y2="${cy-r0+4}" stroke="var(--ink)" stroke-width="1" stroke-dasharray="2 3" opacity=".5"/></svg>`;
+}
+const GRID = {AK:[0,0],ME:[10,0],VT:[9,1],NH:[10,1],WA:[0,2],ID:[1,2],MT:[2,2],ND:[3,2],MN:[4,2],IL:[5,2],WI:[6,2],MI:[7,2],NY:[8,2],RI:[9,2],MA:[10,2],
+  OR:[0,3],NV:[1,3],WY:[2,3],SD:[3,3],IA:[4,3],IN:[5,3],OH:[6,3],PA:[7,3],NJ:[8,3],CT:[9,3],CA:[0,4],UT:[1,4],CO:[2,4],NE:[3,4],MO:[4,4],KY:[5,4],WV:[6,4],VA:[7,4],MD:[8,4],DE:[9,4],
+  AZ:[1,5],NM:[2,5],KS:[3,5],AR:[4,5],TN:[5,5],NC:[6,5],SC:[7,5],DC:[8,5],OK:[3,6],LA:[4,6],MS:[5,6],AL:[6,6],GA:[7,6],HI:[0,7],TX:[3,7],FL:[8,7]};
+function resultMap(){
+  const S_=46,G=4,U=S_+G; let out="";
+  for(const [st,[c,r]] of Object.entries(GRID)){
+    const x=c*U,y=r*U, race=RACE_BY[st], w=race?R.races?.[st]:null;
+    let fill="var(--bg)", ink="var(--muted)", stroke="var(--line)", dash="", sub="", sw=1;
+    if(race){ if(w){ fill=pv(w); ink="var(--surface)"; stroke="none"; sub=race.c[w].split(" ").pop(); } else { fill="var(--surface)"; ink="var(--ink)"; stroke="var(--muted)"; dash="4 3"; sw=1.5; sub=hasRes()?"open":"race"; } }
+    out+=`<g><title>${race?esc(race.st)+": "+(w?esc(race.c[w])+" won":"not called yet"):st}</title><rect x="${x}" y="${y}" width="${S_}" height="${S_}" rx="5" style="fill:${fill};stroke:${stroke};stroke-width:${sw}px${dash?";stroke-dasharray:"+dash:""}"/>`+
+      `<text x="${x+S_/2}" y="${y+(sub?S_/2-1:S_/2+4.5)}" text-anchor="middle" style="fill:${ink};font-weight:${race?600:400};font-size:13px">${st}</text>`+
+      (sub?`<text x="${x+S_/2}" y="${y+S_/2+12}" text-anchor="middle" style="fill:${ink};font-size:8.5px">${esc(sub)}</text>`:"")+`</g>`;
+  }
+  return `<svg viewBox="-3 -3 ${11*U-G+6} ${8*U-G+6}" role="img" aria-label="Tile map of the Senate battlegrounds">${out}</svg>`;
+}
+
+/* --- S1: approval vs seat change --- */
+const MIDTERMS = [[1946,"Truman",33,-55],[1950,"Truman",39,-29],[1954,"Eisenhower",61,-18],[1958,"Eisenhower",57,-47],[1962,"Kennedy",61,-4],[1966,"Johnson",44,-47],[1970,"Nixon",58,-12],[1974,"Ford",54,-43],[1978,"Carter",49,-11],[1982,"Reagan",42,-28],[1986,"Reagan",63,-5],[1990,"G.H.W. Bush",58,-8],[1994,"Clinton",46,-53],[1998,"Clinton",66,5],[2002,"G.W. Bush",63,6],[2006,"G.W. Bush",38,-30],[2010,"Obama",45,-63],[2014,"Obama",44,-13],[2018,"Trump",40,-40],[2022,"Biden",40,-9]];
+function regress(){ const n=MIDTERMS.length; const mx=MIDTERMS.reduce((a,d)=>a+d[2],0)/n, my=MIDTERMS.reduce((a,d)=>a+d[3],0)/n;
+  let sxy=0,sxx=0; MIDTERMS.forEach(d=>{sxy+=(d[2]-mx)*(d[3]-my); sxx+=(d[2]-mx)**2;}); const b=sxy/sxx; return {b, a:my-b*mx}; }
+function vizS1(el){
+  const W=640,H=340,L=46,B=36,T=14,Rm=14; const x=v=>L+(v-30)/(70-30)*(W-L-Rm), y=v=>T+(10-v)/(10+70)*(H-T-B);
+  const {a,b}=regress(); const res26 = (hasRes() && typeof R.house?.R==="number" && R.house.open===0) ? R.house.R-219 : (hasRes()&&typeof R.house?.R==="number"? R.house.R-219 : null);
+  let g=""; for(let v=-60;v<=10;v+=10){ g+=`<line x1="${L}" x2="${W-Rm}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end">${v>0?"+":""}${v}</text>`; }
+  for(let v=30;v<=70;v+=10){ g+=`<text x="${x(v)}" y="${H-B+18}" text-anchor="middle">${v}%</text>`; }
+  g+=`<line x1="${x(50)}" x2="${x(50)}" y1="${T}" y2="${H-B}" stroke="var(--muted)" stroke-dasharray="3 3"/><text x="${x(50)+4}" y="${T+10}">50 % approval</text>`;
+  g+=`<line x1="${x(30)}" y1="${y(a+b*30)}" x2="${x(70)}" y2="${y(a+b*70)}" stroke="var(--accent)" stroke-width="2" opacity=".55"/>`;
+  g+=MIDTERMS.map((d,i)=>`<circle data-pt="${i}" cx="${x(d[2])}" cy="${y(d[3])}" r="7" fill="${["Truman","Kennedy","Johnson","Carter","Clinton","Obama","Biden"].includes(d[1])?"var(--dem)":"var(--rep)"}" opacity=".85" style="cursor:pointer"><title>${d[0]} ${d[1]}: ${d[2]} % approval, ${d[3]>0?"+":""}${d[3]} seats</title></circle>`).join("");
+  g+=`<line x1="${x(35)}" x2="${x(35)}" y1="${T}" y2="${H-B}" stroke="var(--rep)" stroke-width="2" stroke-dasharray="5 4"/><text x="${x(35)+5}" y="${H-B-8}" class="strong">2026: ~35 %</text>`;
+  if(res26!=null) g+=`<rect x="${x(35)-8}" y="${y(res26)-8}" width="16" height="16" fill="var(--rep)" stroke="var(--ink)" stroke-width="2" transform="rotate(45 ${x(35)} ${y(res26)})"/><text x="${x(35)+12}" y="${y(res26)+4}" class="strong">2026 result: ${res26>0?"+":""}${res26}</text>`;
+  g+=`<text x="${L}" y="${H-4}">President's job approval before the midterm (Gallup) →</text><text transform="translate(12 ${T+150}) rotate(-90)" text-anchor="middle">House seats won/lost by President's party</text>`;
+  el.innerHTML=`<h3>Approval and seat losses, 1946–2022</h3>
+  <p class="hint">Each dot is one midterm (blue = Democratic President, red = Republican). The purple line is the trend. Tap a dot for details.</p>
+  <div class="chart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Scatter plot of presidential approval and House seat changes in midterms">${g}</svg></div>
+  <p id="pt-info" class="msg">Tap a dot.</p>
+  <div class="stack tight"><label class="f"><span>Try it: what does the trend line predict for an approval of <b id="ap-v">35</b> %?</span><input type="range" id="ap" min="30" max="70" value="35"></label>
+  <p class="big" id="ap-out"></p><p class="hint">The trend line is a simple statistical estimate from 20 elections, not a forecast model. ${res26!=null?"The diamond shows the 2026 result so far (change from 219 Republican seats).":"The 2026 result is added on 5 November."}</p></div>
+  <p class="hint">Sources: Gallup (1946–2014 approval and seat changes); Gallup approval and House Clerk results for 2018 and 2022; 2026 approval: PollCheck average, 27 Oct 2026.</p>`;
+  const upd=()=>{ const v=+$("#ap").value; $("#ap-v").textContent=v; const p=Math.round(a+b*v); $("#ap-out").textContent=`${p>0?"+":""}${p} seats`; };
+  $("#ap").oninput=upd; upd();
+  el.querySelectorAll("[data-pt]").forEach(c=>c.onclick=()=>{ const d=MIDTERMS[+c.dataset.pt]; $("#pt-info").innerHTML=`<b>${d[0]} · ${d[1]}</b>: approval ${d[2]} %, House seats ${d[3]>0?"+":""}${d[3]}`; });
+}
+
+/* --- S2: gas, concerns, timeline, calculator --- */
+function vizS2(el){
+  const gas=[["Late Feb 2026 (before the Iran war)",2.95,"under $3 (ABC News)"],["September 2026 average",4.33,"record for September (AAA)"],["29 October 2026",4.23,"AAA national average"]];
+  el.innerHTML=`<h3>The price of a gallon</h3>
+  <div class="hbars">${gas.map(([l,v,s])=>`<div class="hb"><span>${l}</span><div class="track"><div class="bar" style="width:${v/4.5*100}%;background:${v>4?"var(--rep)":"var(--accent)"}"></div></div><span class="v">$${v.toFixed(2)}</span></div>`).join("")}</div>
+  <p class="hint">Regular gasoline, US national average per gallon (3.8 litres). February value shown as $2.95 = “under $3” (ABC News). Sources: AAA, ABC News.</p>
+  <h3>Gas calculator</h3>
+  <div class="calc"><div class="cell"><label class="f"><span>Gallons per week: <b id="gal-v">15</b></span><input type="range" id="gal" min="5" max="30" value="15"></label></div>
+    <div class="cell"><div class="eyebrow">Extra cost per year</div><div class="big" id="gal-out"></div><p class="hint">Oct 2026 vs. Feb 2026 prices</p></div>
+    <div class="cell"><div class="eyebrow">That is about</div><div class="big" id="gal-w"></div><p class="hint">hours of work at the federal minimum wage ($7.25)</p></div></div>
+  <h3>Timeline</h3>
+  <div class="tl">
+    <div><b>1 Oct 2025</b>Government shutdown begins – Democrats demand an extension of ACA health subsidies.</div>
+    <div><b>12 Nov 2025</b>Shutdown ends after 43 days, the longest in US history – without the extension.</div>
+    <div><b>31 Dec 2025</b>Enhanced ACA subsidies expire; unsubsidised benchmark premiums ~22 % higher than in 2025 (Urban Institute).</div>
+    <div><b>20 Feb 2026</b>Supreme Court strikes down the IEEPA tariffs (6–3); the administration imposes a new global tariff of 10, then 15 %.</div>
+    <div><b>28 Feb 2026</b>US and Israeli strikes on Iran; the war disrupts traffic through the Strait of Hormuz.</div>
+    <div><b>7–8 Apr 2026</b>Two-week ceasefire; fighting flares up again in the following months.</div>
+    <div><b>Sept 2026</b>Gas averages $4.33 – a record for September.</div>
+    <div><b>Early Oct 2026</b>KFF poll: health-care costs and gas tie as voters' top economic worry.</div>
+    <div><b>3 Nov 2026</b>Election day.</div>
+  </div>`;
+  const upd=()=>{ const g=+$("#gal").value; $("#gal-v").textContent=g; const extra=(4.23-2.95)*g*52; $("#gal-out").textContent="$"+Math.round(extra).toLocaleString("en-US"); $("#gal-w").textContent=Math.round(extra/7.25)+" h"; };
+  $("#gal").oninput=upd; upd();
+}
+
+/* --- S3: coalitions + sorter --- */
+const SORT3 = [
+  {t:"Latino support for Republicans rose in 2020 and again in 2024.", a:"re", why:"Two elections in a row in the same direction look like a trend, not a one-off."},
+  {t:"In October 2026, Latino voters preferred Democratic control of Congress by 24 points.", a:"pr", why:"A rapid swing back suggests the 2024 vote was conditional."},
+  {t:"Many Latino voters say they turned away from Trump without warming to the Democrats.", a:"un", why:"This points to dealignment: loyalty to neither party."},
+  {t:"Republicans now do better among voters without a college degree of all ethnic backgrounds.", a:"re", why:"A class-based shift across groups is typical of a realignment."},
+  {t:"Young voters name cost of living and corruption as their top issues – not party identity.", a:"pr", why:"Issue-driven votes can move quickly when circumstances change."},
+  {t:"Only about a third of young people said they would definitely vote in 2026.", a:"un", why:"Low turnout tells us about motivation, not about lasting loyalty."}
+];
+function vizS3(el){
+  const G=R.exit?.groups||{};
+  const rows=[
+    {g:"Latino voters", v24:14, p26:24, e26:G.latino, n24:"AP VoteCast 2024: Harris 56–42", n26:"NBC/Telemundo, Oct 2026: D +24 (Congress)"},
+    {g:"Voters 18–29", v24:6, p26:37, e26:G.young, n24:"AP VoteCast 2024: Harris 52–46", n26:"Harvard Youth Poll: D +37 among likely voters"},
+    {g:"Suburban voters", v24:null, p26:null, e26:G.suburban, n24:"", n26:""}
+  ];
+  const W=640,H=200,L=150,Rm=20; const x=v=>L+(v+30)/(70)*(W-L-Rm);
+  let g=""; for(let v=-30;v<=40;v+=10){ g+=`<line x1="${x(v)}" x2="${x(v)}" y1="20" y2="${H-24}" stroke="${v===0?"var(--ink)":"var(--line)"}"/><text x="${x(v)}" y="${H-8}" text-anchor="middle">${v===0?"tie":(v>0?"D +"+v:"R +"+(-v))}</text>`; }
+  rows.forEach((r,i)=>{ const yy=44+i*52; g+=`<text x="10" y="${yy+4}" class="strong">${r.g}</text>`;
+    const pts=[[r.v24,"var(--muted)","2024"],[r.p26,"var(--accent)","poll 2026"],[r.e26,"var(--ok)","exit 2026"]].filter(p=>typeof p[0]==="number");
+    if(pts.length>1) g+=`<line x1="${x(Math.min(...pts.map(p=>p[0])))}" x2="${x(Math.max(...pts.map(p=>p[0])))}" y1="${yy}" y2="${yy}" stroke="var(--line)" stroke-width="6" stroke-linecap="round"/>`;
+    pts.forEach(p=>{ g+=`<circle cx="${x(p[0])}" cy="${yy}" r="8" fill="${p[1]}"><title>${r.g}, ${p[2]}: ${p[0]>0?"D +"+p[0]:"R +"+(-p[0])}</title></circle>`; });
+    if(!pts.length) g+=`<text x="${x(0)+8}" y="${yy+4}">exit poll data on 5 Nov</text>`;
+  });
+  el.innerHTML=`<h3>Who moved? Democratic lead in points</h3>
+  <div class="legend"><span><i style="background:var(--muted)"></i>2024 vote</span><span><i style="background:var(--accent)"></i>2026 pre-election poll</span><span><i style="background:var(--ok)"></i>2026 exit poll${R.exit?.source?" ("+esc(R.exit.source)+")":""}</span></div>
+  <div class="chart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Dumbbell chart of party margins by group">${g}</svg></div>
+  <p class="hint">Careful: the measures are not identical (2024 = actual vote; polls = intentions of different samples, e.g. Harvard = likely voters only). ${rows.filter(r=>r.n24).map(r=>r.n24+"; "+r.n26).join(" · ")}.</p>
+  <h3>Evidence sorter: realignment or protest?</h3>
+  <p class="hint">Decide for each piece of evidence, then check.</p>
+  <div class="sorter">${SORT3.map((s,i)=>`<div class="sort-item"><span>${esc(s.t)}</span><div class="seg">${[["re","points to realignment"],["pr","points to protest vote"],["un","unclear / dealignment"]].map(([k,l])=>`<button type="button" data-sort="s3:${i}:${k}" aria-pressed="${S.sort["s3_"+i]===k}">${l}</button>`).join("")}</div><div id="fb3-${i}"></div></div>`).join("")}</div>
+  <div class="btns"><button class="btn small" id="chk3">Check my sorting</button></div>`;
+  $("#chk3").onclick=()=>SORT3.forEach((s,i)=>{ const v=S.sort["s3_"+i]; $("#fb3-"+i).innerHTML=v?`<div class="fb ${v===s.a?"ok":"no"}">${v===s.a?"✓ ":"Our suggestion: "+({re:"realignment",pr:"protest vote",un:"unclear"}[s.a])+". "}${esc(s.why)} <i>(Arguable – a good justification counts more than the label.)</i></div>`:""; });
+}
+
+/* --- S4: gerrymander + redistricting table --- */
+const VOTERS = ["AAAAB","AAABB","AAABB","AABBB","AAABB"];
+const PRESETS = {
+  rows:[[1,1,1,1,1],[2,2,2,2,2],[3,3,3,3,3],[4,4,4,4,4],[5,5,5,5,5]],
+  cols:[[1,2,3,4,5],[1,2,3,4,5],[1,2,3,4,5],[1,2,3,4,5],[1,2,3,4,5]]
+};
+const DCOL = ["","#f2d7ee","#d7e8f2","#e3f2d7","#f2ead7","#e0dcf5"];
+let brush=1;
+function gmEval(m){
+  const d={}; for(let r=0;r<5;r++) for(let c=0;c<5;c++){ const k=m[r][c]; if(!k) continue; (d[k]=d[k]||[]).push([r,c]); }
+  const out={A:0,B:0,errs:[]};
+  for(let k=1;k<=5;k++){ const cells=d[k]||[]; if(cells.length!==5){ out.errs.push(`District ${k} has ${cells.length} squares (needs 5).`); continue; }
+    const set=new Set(cells.map(([r,c])=>r+","+c)); const seen=new Set([cells[0].join(",")]); const st=[cells[0]];
+    while(st.length){ const [r,c]=st.pop(); [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dr,dc])=>{ const kk=(r+dr)+","+(c+dc); if(set.has(kk)&&!seen.has(kk)){ seen.add(kk); st.push([r+dr,c+dc]); } }); }
+    if(seen.size!==5){ out.errs.push(`District ${k} is not connected.`); continue; }
+    const a=cells.filter(([r,c])=>VOTERS[r][c]==="A").length; if(a>=3) out.A++; else out.B++; }
+  return out;
+}
+function vizS4(el){
+  if(!S.gm) S.gm={mode:"rows", m:PRESETS.rows.map(r=>[...r])};
+  const m=S.gm.m; const ev=gmEval(m);
+  el.innerHTML=`<h3>Gerrymander simulator</h3>
+  <p>The state of Gridland has 25 voters and 5 seats. <b style="color:var(--pa)">Party A</b> has 15 voters (60 %), <b style="color:var(--pb)">Party B</b> 10 (40 %). Each district needs 5 connected squares. <b>Challenge:</b> draw the map so that Party B wins 3 of 5 seats.</p>
+  <div class="btns"><button class="btn small" data-gm="rows">Map 1: rows</button><button class="btn small" data-gm="cols">Map 2: columns</button><button class="btn small" data-gm="draw">Draw my own</button></div>
+  <div class="row" style="align-items:flex-start">
+    <div class="stack tight" style="flex:0 1 340px">
+      <div class="gm" id="gm">${m.map((row,r)=>row.map((k,c)=>`<button type="button" data-cell="${r}:${c}" style="background:${k?DCOL[k]:"var(--sunken)"}" aria-label="Row ${r+1}, column ${c+1}, party ${VOTERS[r][c]}, district ${k||"none"}"><span class="lab">${k||""}</span><span class="dot" style="background:${VOTERS[r][c]==="A"?"var(--pa)":"var(--pb)"}"></span></button>`).join("")).join("")}</div>
+      ${S.gm.mode==="draw"?`<div class="brush">${[1,2,3,4,5].map(k=>`<button type="button" data-brush="${k}" aria-pressed="${brush===k}" style="background:${DCOL[k]}">${k}</button>`).join("")}<button type="button" class="btn small" data-gm="clear">Clear</button></div><p class="hint">Pick a district number, then tap squares.</p>`:""}
+    </div>
+    <div class="stack tight" style="flex:1 1 220px">
+      ${ev.errs.length?`<div class="msg err">${ev.errs.map(esc).join("<br>")}</div>`:`<div class="calc"><div class="cell"><div class="eyebrow" style="color:var(--pa)">Party A seats</div><div class="big">${ev.A}</div><p class="hint">with 60 % of votes</p></div><div class="cell"><div class="eyebrow" style="color:var(--pb)">Party B seats</div><div class="big">${ev.B}</div><p class="hint">with 40 % of votes</p></div></div>
+      ${ev.B>=3?`<div class="msg ok"><b>You did it.</b> The minority wins the majority – by packing A voters into two districts and spreading the rest thinly.</div>`:""}`}
+    </div>
+  </div>
+  <h3>The mid-decade redistricting war (estimates before the vote)</h3>
+  <div class="tbl-wrap"><table><thead><tr><th>State</th><th>When / how</th><th>Meant to help</th><th class="num">Est. seats</th></tr></thead><tbody>
+    <tr><td>Texas</td><td>Legislature, Aug 2025</td><td style="color:var(--rep)">Republicans</td><td class="num">up to +5</td></tr>
+    <tr><td>California</td><td>Prop. 50, voters, 4 Nov 2025</td><td style="color:var(--dem)">Democrats</td><td class="num">+4 to +5</td></tr>
+    <tr><td>Missouri</td><td>Legislature, Sept 2025</td><td style="color:var(--rep)">Republicans</td><td class="num">+1</td></tr>
+    <tr><td>North Carolina</td><td>Legislature, Oct 2025</td><td style="color:var(--rep)">Republicans</td><td class="num">+1</td></tr>
+    <tr><td>Ohio</td><td>Redistricting commission, 2025</td><td style="color:var(--rep)">Republicans</td><td class="num">up to +2</td></tr>
+    <tr><td>Utah</td><td>Court-ordered map, Nov 2025</td><td style="color:var(--dem)">Democrats</td><td class="num">+1</td></tr>
+    <tr><td>Florida + Tennessee</td><td>Legislatures, May 2026</td><td style="color:var(--rep)">Republicans</td><td class="num">+5 together</td></tr>
+    <tr><td>Virginia</td><td>Constitutional amendment, referendum Apr 2026</td><td style="color:var(--dem)">Democrats</td><td class="num">?</td></tr>
+  </tbody></table></div>
+  <p class="hint">Estimates of what each map was <i>designed</i> to do (Ballotpedia, Bloomberg Government, PBS); actual effects depend on candidates and turnout. Net estimate before the vote: about +10 seats for Republicans (Bloomberg Government).</p>`;
+  el.querySelectorAll("[data-gm]").forEach(b=>b.onclick=()=>{ const k=b.dataset.gm;
+    if(k==="draw"){ S.gm={mode:"draw", m:S.gm.m.map(r=>[...r])}; }
+    else if(k==="clear"){ S.gm={mode:"draw", m:[[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]}; }
+    else S.gm={mode:k, m:PRESETS[k].map(r=>[...r])};
+    save(); vizS4(el); });
+  el.querySelectorAll("[data-brush]").forEach(b=>b.onclick=()=>{ brush=+b.dataset.brush; vizS4(el); });
+  el.querySelectorAll("[data-cell]").forEach(b=>b.onclick=()=>{ if(S.gm.mode!=="draw"){ S.gm={mode:"draw", m:S.gm.m.map(r=>[...r])}; }
+    const [r,c]=b.dataset.cell.split(":").map(Number); S.gm.m[r][c]=brush; save(); vizS4(el); });
+}
+
+/* --- S5: border chart --- */
+function vizS5(el){
+  const d=[["FY2022",2.21],["FY2023",2.05],["FY2024",1.53],["FY2025",0.238],["FY2026*",0.099]];
+  el.innerHTML=`<h3>Border Patrol apprehensions at the south-western border (millions)</h3>
+  <div class="hbars">${d.map(([l,v],i)=>`<div class="hb"><span>${l}${i<3?" · Biden":(i===3?" · Biden (4 months) / Trump":" · Trump")}</span><div class="track"><div class="bar" style="width:${v/2.3*100}%;background:${i>=3?"var(--rep)":"var(--dem)"}"></div></div><span class="v">${v>=1?v.toFixed(2)+" m":Math.round(v*1000).toLocaleString("en-US")+"k"}</span></div>`).join("")}</div>
+  <p class="hint">Fiscal year = 1 Oct – 30 Sept. FY2025: 237,565 (DHS; about 72 % of them in the last months of the Biden administration). *FY2026 preliminary: 98,708 (DHS). Sources: AP/KSL, Spectrum News/DHS, DHS release Oct 2026.</p>
+  <h3>The tax law of July 2025 (“Working Families Tax Cut”)</h3>
+  <div class="tbl-wrap"><table><thead><tr><th>Measure</th><th>Republican framing</th><th>Democratic framing</th></tr></thead><tbody>
+    <tr><td>2017 tax cuts made permanent</td><td>No tax hike for families</td><td>Mainly benefits high earners</td></tr>
+    <tr><td>No federal income tax on tips and overtime (until 2028)</td><td>Rewards hard work</td><td>Temporary; payroll tax still applies</td></tr>
+    <tr><td>Extra deduction for seniors</td><td>Relief for retirees</td><td>Small compared with other changes</td></tr>
+    <tr><td>Medicaid cuts / stricter rules</td><td>Fighting waste, work requirements</td><td>Millions could lose coverage – “Big, Ugly Bill”</td></tr>
+  </tbody></table></div>`;
+}
+
+/* --- S6: feed lab --- */
+const FEED = [
+  {acct:"Candidate for Congress", h:"@ElectSmith26", body:"Gas is $4.29 and they want you to say thank you. Remember who did this on November 3. 🔥", media:"", a:"attack"},
+  {acct:"State Representative", h:"@RepLopez", body:"60 seconds at my kitchen table: why your health insurance got more expensive in January – and what Congress could do about it.", media:"▶ 1:00 video · kitchen table, bills on the table", a:"explain"},
+  {acct:"Campaign account", h:"@TeamRiverPAC", body:"When the other side explains their economic plan:", media:"🖼 cartoon of a clown juggling dollar bills", a:"meme"},
+  {acct:"County Party", h:"@CountyVotes", body:"Polls are open 7 a.m. – 8 p.m. today! Find your polling place 👉 link in bio. Bring a friend.", media:"", a:"gotv"},
+  {acct:"Gaming streamer (2.1m followers)", h:"@PixelPete", body:"Ok chat, real talk for one minute: I'm voting for Jordan Kim, here's why …", media:"▶ clip from a live stream · no #ad label", a:"influencer"},
+  {acct:"Anonymous account", h:"@truth_now_8812", body:"LEAKED: Senator caught on tape saying he 'hates working people'. Share before they delete it!!", media:"▶ 0:14 video · very realistic face and voice", a:"fake"}
+];
+const FEEDCAT = [["attack","Attack / negative"],["explain","Issue explainer"],["meme","Humour / meme"],["gotv","Get out the vote"],["influencer","Influencer endorsement"],["fake","Possible deepfake / disinformation"]];
+function vizS6(el){
+  el.innerHTML=`<h3>Feed Lab</h3><p class="hint">Six <b>invented</b> posts (no real accounts). Which technique does each one use? Then check.</p>
+  <div class="cols2">${FEED.map((p,i)=>`<div class="post"><div class="acct"><span class="av">${esc(p.acct[0])}</span><span><b>${esc(p.acct)}</b><br><span class="muted">${esc(p.h)}</span></span></div><div class="body">${esc(p.body)}</div>${p.media?`<div class="media">${esc(p.media)}</div>`:""}
+    <select data-feed="${i}"><option value="">Technique …</option>${FEEDCAT.map(([k,l])=>`<option value="${k}" ${S.feed[i]===k?"selected":""}>${l}</option>`).join("")}</select><div id="fb6-${i}"></div></div>`).join("")}</div>
+  <div class="btns"><button class="btn small" id="chk6">Check</button></div>`;
+  $("#chk6").onclick=()=>FEED.forEach((p,i)=>{ const v=S.feed[i]; $("#fb6-"+i).innerHTML=v?`<div class="fb ${v===p.a?"ok":"no"}">${v===p.a?"✓ Right.":"Our suggestion: "+FEEDCAT.find(c=>c[0]===p.a)[1]+"."}${p.a==="influencer"?" Note: no label – is this paid advertising?":""}${p.a==="fake"?" Check: who posted it? Is there an original source?":""}</div>`:""; });
+}
+
+/* --- S7: money --- */
+function vizS7(el){
+  const big=[["Elon Musk (total, mid-Oct)",366,"var(--rep)"],["Senate Leadership Fund (R): raised Jul–Sep",272.9,"var(--rep)"],["Leading the Future (AI) – pledged",100,"var(--ind)"],["Fairshake (crypto) – 2024 spending",133,"var(--ind)"],["Michael Bloomberg (to super PACs)",81,"var(--dem)"]];
+  const musk=[["Senate Leadership Fund",158],["America PAC (field programme)",76],["Congressional Leadership Fund",20],["Lone Star Liberty PAC (Texas)",10],["other",102]];
+  el.innerHTML=`<h3>Some of the biggest sums (million US dollars)</h3>
+  <div class="hbars">${big.map(([l,v,c])=>`<div class="hb"><span>${l}</span><div class="track"><div class="bar" style="width:${v/366*100}%;background:${c}"></div></div><span class="v">$${v}m</span></div>`).join("")}</div>
+  <p class="hint">Colours: red = mainly Republican, blue = mainly Democratic, gold = industry PACs supporting both parties. The figures are different kinds of numbers (spent, raised, pledged) from different dates – compare with care. Sources: NYT via Business Day (Musk), The New Republic (SLF), NBC News/Wired (AI, crypto), Public Citizen (Bloomberg).</p>
+  <h3>Where did Musk's ~$366 million go?</h3>
+  <div style="display:flex;height:34px;border-radius:6px;overflow:hidden">${musk.map(([l,v],i)=>`<div title="${l}: $${v}m" style="flex:${v};background:${["var(--rep)","#e0655f","#ea8f8a","#f2b5b2","var(--tbd)"][i]};display:grid;place-items:center;color:#fff;font-family:var(--f-mono);font-size:.72rem;overflow:hidden">${v>=20?"$"+v+"m":""}</div>`).join("")}</div>
+  <div class="legend">${musk.map(([l,v],i)=>`<span><i style="background:${["var(--rep)","#e0655f","#ea8f8a","#f2b5b2","var(--tbd)"][i]};border-radius:2px"></i>${l} ($${v}m)</span>`).join("")}</div>
+  <p class="hint">“other” = remainder of the reported total, not itemised in the sources.</p>
+  <div class="factbox"><b>For comparison:</b> donors who gave $1 million or more provided about <b>$4.2 billion</b> to super PACs in the 2026 cycle (Public Citizen, based on FEC data).</div>`;
+}
+
+const VIZ = {s1:vizS1, s2:vizS2, s3:vizS3, s4:vizS4, s5:vizS5, s6:vizS6, s7:vizS7};
+
+/* =========================================================
+   EVENTS
+   ========================================================= */
+function setPath(path, val){ const p=path.split("."); let o=S; for(let i=0;i<p.length-1;i++){ o=o[p[i]]=o[p[i]]||{}; } o[p[p.length-1]]=val; }
+function getPath(path){ return path.split(".").reduce((o,k)=>o?.[k], S); }
+function updWC(){ document.querySelectorAll("[data-wc]").forEach(el=>{ const w=words(getPath(el.dataset.wc)); const isText=el.dataset.wc==="text"; el.textContent = isText ? `${w} words · target 250–350` : `${w} word${w===1?"":"s"}${el.dataset.wc.startsWith("ans")&&w<25?" · at least 25":""}`; }); const m=$("#wmeter"); if(m) m.style.width=Math.min(100,words(S.text)/350*100)+"%"; }
+
+function afterRender(view){
+  updWC();
+  if(ST(view)){ const el=$("#viz-"+view); VIZ[view](el); }
+  if(view==="results"){ $("#fc-out").innerHTML=forecastHTML(); }
+  if(view==="handin"){
+    $("#preview").textContent=exportText(); $("#savecode").textContent=saveCode();
+    $("#btn-mail").onclick=e=>{ e.preventDefault(); const body=exportText(false); const subj=`Midterms Lab – ${S.n||"student"}`;
+      location.href=`mailto:?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(body)}`; };
+    $("#btn-copyall").onclick=()=>copyText(exportText(), $("#copy-msg"), "Copied – paste it into an email.");
+    $("#btn-copycode").onclick=()=>copyText(saveCode(), $("#code-msg"), "Save code copied.");
+    $("#btn-reset").onclick=()=>{ if(confirm("Really delete all your work on this device?")){ S=blank(); ls.set(KEY,S); location.hash="#start"; route(); } };
+  }
+  if(view==="start"){
+    $("#btn-load").onclick=()=>{ const o=decodeSave($("#load-code").value);
+      if(!o){ $("#load-msg").textContent="That code could not be read. Copy the whole code (it starts with MA26.)."; return; }
+      S=Object.assign(blank(),o); ls.set(KEY,S); route(); $("#load-msg").textContent="Loaded – welcome back, "+(S.n||"")+"."; };
+  }
+}
+
+document.addEventListener("input", e=>{
+  const k=e.target.dataset.k; if(!k) return;
+  setPath(k, e.target.value); if(k==="n") S.n=S.n.slice(0,40); save(); updWC();
+  if(k==="fc"){ const o=$("#fc-out"); if(o) o.innerHTML=forecastHTML(); }
+  if(k==="n") $("#who").textContent=S.n||"Not signed in";
+});
+document.addEventListener("change", e=>{
+  const t=e.target;
+  if(t.dataset.task){ const [id,i]=t.dataset.task.split(":"); const a=S.t[id]=S.t[id]||[]; const n=+i;
+    if(t.checked){ if(a.length<3 && !a.includes(n)) a.push(n); } else S.t[id]=a.filter(x=>x!==n);
+    save(); const y=window.scrollY; route(); window.scrollTo(0,y); }
+  if(t.dataset.chk){ S.chk[t.dataset.chk]=t.checked; save(); }
+  if(t.dataset.feed!=null && t.tagName==="SELECT"){ S.feed[t.dataset.feed]=t.value; save(); }
+});
+document.addEventListener("click", e=>{
+  const b=e.target.closest("button,[data-phrase]"); if(!b) return;
+  const y=window.scrollY;
+  if(b.dataset.a){ S.a=b.dataset.a; if(S.b===S.a) S.b=null; if(S.c===S.a) S.c=null; save(); route(); window.scrollTo(0,y); }
+  else if(b.dataset.lk){ const [w,q,v]=b.dataset.lk.split(":"); S[w][q]=+v; save(); route(); window.scrollTo(0,y); }
+  else if(b.dataset.role){ const [r,id]=b.dataset.role.split(":"); if(r==="b") S.b=id; if(r==="c") S.c=id; if(r==="x"){ if(S.b===id){ S.b=S.c; S.c=null; } else if(S.c===id) S.c=null; } save(); route(); window.scrollTo(0,y); }
+  else if(b.dataset.wt){ S.wt=b.dataset.wt; save(); route(); window.scrollTo(0,y); }
+  else if(b.dataset.sort){ const [st,i,k]=b.dataset.sort.split(":"); S.sort[st+"_"+i]=k; save(); b.parentElement.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", x===b)); }
+  else if(b.dataset.phrase){ copyText(b.dataset.phrase, $("#ph-msg"), "Copied: “"+b.dataset.phrase+"”"); }
+});
+
+route();
+</script>
+</body>
+</html>
