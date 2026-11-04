@@ -468,7 +468,7 @@ const LIKERT = ["strongly disagree","disagree","not sure","agree","strongly agre
    STATE
    ========================================================= */
 const KEY = "ma26.state";
-const blank = () => ({v:1, n:"", a:null, b:null, c:null, t:{}, ans:{}, card:{}, sort:{}, feed:{}, gm:null, pre:{}, post:{}, change:"", wt:"comment", head:"", text:"", chk:{}, fc:""});
+const blank = () => ({v:1, n:"", a:null, b:null, c:null, t:{}, ans:{}, card:{}, sort:{}, feed:{}, gm:null, pre:{}, post:{}, change:"", wt:"comment", head:"", text:"", sig:"", chk:{}, fc:""});
 const ls = { get(k,d){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch{ return d; } }, set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch{} } };
 let S = Object.assign(blank(), ls.get(KEY, {}));
 let saveT=null;
@@ -620,6 +620,7 @@ function vResults(){
       ${R.governors&&R.governors.length?`<div class="tbl-wrap"><table><thead><tr><th>State</th><th>Winner</th><th></th></tr></thead><tbody>${R.governors.map(g=>`<tr><td>${esc(g.st)}</td><td style="color:${g.winner?pv(g.winner):"var(--muted)"}">${g.winner?esc(g.name)+" ("+g.winner+")":"not called"}</td><td>${g.flip?'<span class="tag extra">flip</span>':""}</td></tr>`).join("")}</tbody></table></div>`:`<p class="hint">36 states elected a governor. Key races are added on 5 November.</p>`}
     </section>
   </div>
+  ${vBonus()}
   <section class="panel stack">
     <h3>How good was your forecast?</h3>
     <p>Paste the code you created in the <a href="https://makrahl.github.io/midterms-2026/" target="_blank" rel="noopener">Forecast Lab</a> before the election (it starts with <span class="mono">MT26.</span>).</p>
@@ -629,6 +630,46 @@ function vResults(){
   ${R.sources&&R.sources.length?`<section class="panel"><h3>Sources for the results</h3><ul class="sources">${R.sources.map(s=>`<li><a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.t)}</a></li>`).join("")}</ul></section>`:""}
   ${next("#stations","Go to the stations")}
   </div>`;
+}
+
+/* Bonus videos: election-night speeches (loaded only on tap, via youtube-nocookie) */
+const VIDEOS = [
+  { id:"KEZWUqW00i0", who:"James Talarico", race:"Texas · US Senate", party:"D", ch:"BBC News", len:"9:36",
+    facts:"Talarico, a 37-year-old state legislator and former teacher, beat Republican Attorney General Ken Paxton. The AP called the race late on election night: the first statewide win for a Democrat in Texas since 1994.",
+    quote:"We just took back Texas.", qsrc:"https://www.tribuneindia.com/news/2026-us-senate/we-just-took-back-texas-says-democrat-james-talarico-in-victory-speech",
+    watch:["Which groups of Texans does he speak to – and which does he leave out?","He presents his win as a victory of “the people” over big money. Is that convincing? (→ Station 7)","Texas redrew its map in 2025 to help Republicans (→ Station 4). What does a statewide Senate race tell us that House districts do not?"],
+    st:["s3","s4","s7"], alt:{t:"Full speech (AP, 19 min)", url:"https://www.youtube.com/watch?v=m7BAUXTiJVY"} },
+  { id:"VZZ79hJ_2GY", who:"Abdul El-Sayed", race:"Michigan · US Senate", party:"D", ch:"CBS News Detroit", len:"21:00",
+    facts:"El-Sayed, a physician and former Detroit health director, beat former Republican congressman Mike Rogers in an open seat. He declared victory early on 4 November; the AP call followed later (NPR). He will be the first Muslim American in the US Senate.",
+    quote:"Michigan, we did it!", qsrc:"https://www.thejakartapost.com/world/2026/11/04/democrat-abdul-el-sayed-claims-victory-in-michigan-senate-battle",
+    watch:["He describes the race as a contest between “money and the many”. Which evidence from Station 7 supports or weakens this claim?","Which issues does he put at the centre – prices, health care, Trump? (→ Station 2, Station 1)","Part of the speech criticises US policy towards Israel. Why is this controversial – and why might it matter to voters in Michigan?"],
+    st:["s1","s2","s7"], alt:null }
+];
+const ytBox = v => `<div class="vid" data-yt="${v.id}" style="aspect-ratio:16/9;border-radius:10px;background:#111;display:grid;place-items:center;overflow:hidden">
+  <button type="button" data-yt="${v.id}" class="btn primary">▶ Play video · ${esc(v.ch)} · ${v.len}</button></div>`;
+function videoCard(v){
+  return `<div class="stack tight" style="border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--bg);border-top:4px solid ${pv(v.party)}">
+    <div><div class="eyebrow">${esc(v.race)}</div><h3>${esc(v.who)} <span class="muted" style="font-size:.9rem">(${v.party==="D"?"Democrat":"Republican"})</span></h3></div>
+    ${ytBox(v)}
+    <p class="hint">Video: ${esc(v.ch)} on YouTube · <a href="https://www.youtube.com/watch?v=${v.id}" target="_blank" rel="noopener">open on YouTube</a>${v.alt?` · <a href="${v.alt.url}" target="_blank" rel="noopener">${esc(v.alt.t)}</a>`:""}</p>
+    <p>${esc(v.facts)}</p>
+    <p><q style="font-style:italic">${esc(v.quote)}</q> <a class="hint" href="${v.qsrc}" target="_blank" rel="noopener">source</a></p>
+    <p style="font-weight:600;margin-top:4px">Watch for:</p>
+    <ul style="margin:0;padding-left:20px">${v.watch.map(w=>`<li>${esc(w)}</li>`).join("")}</ul>
+  </div>`;
+}
+function vBonus(){
+  return `<section class="panel stack" id="bonus">
+    <div class="sec-head"><span class="tag extra">bonus</span><h3>Two victory speeches from election night</h3></div>
+    <p>Two of the most watched Senate races ended with surprise Democratic wins in states Trump carried in 2024. Watch one or both – optional, but useful evidence for your stations and your text.</p>
+    <div class="cols2">${VIDEOS.map(videoCard).join("")}</div>
+    <div class="factbox"><b>Keep the balance:</b> both speeches come from winners of the same party. Ask yourself how a Republican would answer them – Station 5 gives you their arguments. Victory speeches are persuasive texts: they tell you what a winner <i>wants</i> the result to mean, not what it means.</div>
+    <p class="hint">The videos load from YouTube (privacy-enhanced mode) only when you tap “Play”. If YouTube is blocked on your device, use the link at home.</p>
+  </section>`;
+}
+function stationVideoHint(id){
+  const vs=VIDEOS.filter(v=>v.st.includes(id)); if(!vs.length) return "";
+  return `<div class="msg info"><b>Bonus video:</b> ${vs.map(v=>`${esc(v.who)}'s victory speech (${esc(v.race.split(" · ")[0])})`).join(" and ")} – useful for this station. <a href="#results" data-gobonus="1">Watch ${vs.length>1?"them":"it"} under “What happened” →</a></div>`;
 }
 
 /* Forecast Lab compatibility (same race list and code format) */
@@ -698,6 +739,7 @@ function vStation(s){
   <section class="panel stack" id="viz-${s.id}"></section>
   <section class="panel stack"><h3>Voices</h3><div class="voices">${s.voices.map(v=>`<div class="voice ${v.p}">${v.para?`<p><span class="tag">summary</span> ${esc(v.q)}</p>`:`<q>${esc(v.q)}</q>`}<span class="who">${esc(v.who)}${v.url?` · <a href="${esc(v.url)}" target="_blank" rel="noopener">source</a>`:""}</span></div>`).join("")}</div>
     <p class="hint">Red = Republican side, blue = Democratic side, gold = neutral / media. Quotation marks = exact words; “summary” = paraphrase of a source.</p></section>
+  ${stationVideoHint(s.id)}
   <section class="panel stack"><h3>What the results say</h3>${R.notes&&R.notes[s.id]?`<div class="results-box">${R.notes[s.id]}</div>`:`<div class="results-box empty">This box is filled in with the election results on the morning of 5 November.</div>`}</section>
   <section class="panel stack">
     <div class="sec-head"><h3>Task pool</h3></div>
@@ -726,28 +768,54 @@ const PHRASES = {
   "Conceding":["Admittedly, …","It would be naive to deny that …","Critics may object that … However, …","While it is true that …, …"],
   "Concluding":["All things considered, …","What follows from this is …","The real lesson of 2026 may be that …","Whether … remains to be seen, but …"]
 };
+const PHRASES_LETTER = {
+  "Opening: reference + purpose":["I am writing in response to R. J. Hartley's column “Money and maps, not voters” (5 November).","Having read …, I feel compelled to respond.","I would like to take issue with the claim that …","As a student of American politics in Germany, I read … with great interest."],
+  "Making your point":["The author fails to mention …","May I draw your attention to …","I am concerned about …","While the author is right that …, he overlooks …","It is simply not true that …"],
+  "Additional information":["Recent figures from … show that …","According to …, …","This is borne out by …","A telling example is the Senate race in …"],
+  "Concluding sentence":["Your readers deserve a fuller picture than this.","Money and maps matter – but on 3 November, voters had the final word.","Before we write off American voters, we should …"]
+};
+const LETTER_HOW = `<p><b>Why people write letters to the editor:</b> they agree or disagree with something that was published, feel offended by it, or can add an expert opinion or extra information. Make your reason for writing clear.</p>
+<p><b>Form:</b> salutation <b>“Sir or Madam,”</b> – without “Dear”. Neutral, formal style; do not address the editor personally. <b>No closing formula</b> (no “Yours faithfully”): the letter ends with your <b>name and place of residence</b>.</p>
+<p><b>Opening paragraph:</b> name the article or column you are referring to and state the purpose of your letter.</p>
+<p><b>Main part:</b> state your opinion clearly. Paragraphs begin with topic sentences. Make <b>one point – or two at the most</b>, e.g. by pointing out omissions or incorrect aspects. Be factual and <b>never attack the journalist personally</b>. Put forward a different argument or supply additional information from material you know (here: your two stations). A personal perspective is possible.</p>
+<p><b>Ending:</b> a convincing concluding sentence.</p>
+<p><b>Remember:</b> you want to convey a message to the editor and the readers – keep every argument focused on that message; avoid colloquial language and slang; use linking words.</p>
+<p class="hint">Based on your course sheet “Writing a letter to the editor”.</p>`;
 function vWrite(){
-  const w=words(S.text); const pct=Math.min(100,w/350*100);
-  const chk=[["head","A headline that makes readers curious"],["thesis","A clear thesis in the first paragraph"],["ev","At least two pieces of evidence, each with its source"],["stations","Evidence from both of my stations"],["counter","A counter-argument that I take seriously and answer"],["concl","A conclusion that answers “what follows?”"],["reg","Formal register: no contractions, no “I think” in every sentence"]];
+  const w=words(S.text); const pct=Math.min(100,w/350*100); const L=S.wt==="letter";
+  const chk = L
+   ? [["l_sal","Salutation “Sir or Madam,” – without “Dear”"],["l_ref","First paragraph: the column I am responding to + the purpose of my letter"],["l_pts","One clear point (two at most), each paragraph with a topic sentence"],["ev","Additional information from both of my stations, with sources"],["l_fair","Factual – no personal attack on the columnist"],["reg","Neutral/formal style, linking words, no slang or contractions"],["l_end","A convincing concluding sentence"],["l_sig","No closing formula – my name and place of residence at the end"]]
+   : [["head","A headline that makes readers curious"],["thesis","A clear thesis in the first paragraph"],["ev","At least two pieces of evidence, each with its source"],["stations","Evidence from both of my stations"],["counter","A counter-argument that I take seriously and answer"],["concl","A conclusion that answers “what follows?”"],["reg","Formal register: no contractions, no “I think” in every sentence"]];
+  const phr = L ? PHRASES_LETTER : PHRASES;
   return `<div class="stack"><section class="panel stack">
     <div class="sec-head"><span class="step">5</span><h2>Write</h2></div>
     <div class="seg" role="radiogroup" aria-label="Text type">
-      <button type="button" data-wt="comment" aria-pressed="${S.wt==="comment"}">Comment (op-ed)</button>
-      <button type="button" data-wt="letter" aria-pressed="${S.wt==="letter"}">Letter to the editor</button>
+      <button type="button" data-wt="comment" aria-pressed="${!L}">Comment (op-ed)</button>
+      <button type="button" data-wt="letter" aria-pressed="${L}">Letter to the editor</button>
     </div>
-    ${S.wt==="comment"?`<div class="factbox"><b>Task:</b> An English-language news website for young Europeans asks for opinion pieces on the question <b>“Why did America vote the way it did – and what follows?”</b> Write a comment of <b>250–350 words</b>. Use evidence from both of your stations and refer to the results.</div>`
-     :`<div class="factbox"><b>Task:</b> A newspaper columnist wrote after the election: <i>“The midterms were decided by money and maps, not by voters.”</i> (prompt written for this lab). Write a <b>letter to the editor</b> of <b>250–350 words</b> in which you respond to this claim. Use evidence from both of your stations and refer to the results.</div>`}
+    ${!L?`<div class="factbox"><b>Task:</b> An English-language news website for young Europeans asks for opinion pieces on the question <b>“Why did America vote the way it did – and what follows?”</b> Write a comment of <b>250–350 words</b>. Use evidence from both of your stations and refer to the results.</div>`
+     :`<div class="factbox"><b>Task:</b> Read the extract from a column below. Write a <b>letter to the editor</b> of <b>250–350 words</b> in which you respond to it. Use information from both of your stations and refer to the results.</div>
+     <blockquote style="margin:0;padding:12px 16px;border-left:4px solid var(--ink);background:var(--bg);border-radius:0 8px 8px 0">
+       <p class="eyebrow" style="margin-bottom:6px">Column · The Transatlantic Times · 5 November 2026</p>
+       <p style="font-family:Georgia,serif;font-size:1.25rem;font-weight:700;margin-bottom:6px">Money and maps, not voters</p>
+       <p style="font-family:Georgia,serif">Do not be fooled by the victory speeches. This election was not won in the hearts of voters but in the bank accounts of billionaires and the offices of map-drawers. Super PACs spent record sums, a dozen states redrew their districts before a single ballot was cast, and once again barely half of Americans bothered to vote. Calling the result “the will of the people” is a polite fiction. <i>– R. J. Hartley</i></p>
+       <p class="hint" style="margin-top:6px">Newspaper, columnist and text are invented for this lab.</p>
+     </blockquote>
+     <details class="wb" open><summary>How to write a letter to the editor</summary><div class="text" style="margin-top:8px;font-size:.94rem">${LETTER_HOW}</div></details>`}
     <div class="wgrid">
       <div class="stack tight">
-        <input type="text" data-k="head" value="${esc(S.head)}" placeholder="${S.wt==="comment"?"Headline":"Subject line, e.g. Re: “Money and maps, not voters” (6 Nov)"}">
-        <textarea class="long" data-k="text" placeholder="${S.wt==="comment"?"Your comment …":"Sir or Madam, …"}">${esc(S.text)}</textarea>
+        <input type="text" data-k="head" value="${esc(S.head)}" placeholder="${L?"Subject line (optional), e.g. Re: “Money and maps, not voters”, 5 November":"Headline"}">
+        <textarea class="long" data-k="text" placeholder="${L?"Sir or Madam,\n\nI am writing in response to …":"Your comment …"}">${esc(S.text)}</textarea>
+        ${L?`<input type="text" data-k="sig" value="${esc(S.sig||"")}" placeholder="Your name, place of residence – e.g. Mia Weber, Karlsruhe, Germany">`:""}
         <div class="meter"><span id="wmeter" style="width:${pct}%"></span></div>
         <div class="wc" data-wc="text"></div>
       </div>
       <aside class="stack tight">
         <details class="wb" open><summary>Your expert cards</summary><div class="phr">${myStations().map(id=>`<h4>${esc(ST(id).title)}</h4>${[0,1,2].map(i=>S.card[id+"_"+i]?`<p>• ${esc(S.card[id+"_"+i])}</p>`:"").join("")||'<p class="hint">empty</p>'}`).join("")||'<p class="hint">Choose your stations first.</p>'}</div></details>
-        <details class="wb"><summary>Useful phrases (tap to copy)</summary><div class="phr">${Object.entries(PHRASES).map(([k,a])=>`<h4>${k}</h4>${a.map(p=>`<span data-phrase="${esc(p)}">${esc(p)}</span>`).join("")}`).join("")}<p class="hint" id="ph-msg"></p></div></details>
-        <details class="wb" open><summary>Structure</summary><div class="phr"><p>1 · Headline + hook<br>2 · Thesis<br>3 · Argument 1 (Station A) + evidence<br>4 · Argument 2 (Station B) + evidence<br>5 · Counter-argument + rebuttal<br>6 · Conclusion: what follows?</p></div></details>
+        <details class="wb"><summary>Useful phrases (tap to copy)</summary><div class="phr">${Object.entries(phr).map(([k,a])=>`<h4>${k}</h4>${a.map(p=>`<span data-phrase="${esc(p)}">${esc(p)}</span>`).join("")}`).join("")}<p class="hint" id="ph-msg"></p></div></details>
+        <details class="wb" open><summary>Structure</summary><div class="phr">${L
+          ?`<p>1 · Sir or Madam,<br>2 · Reference to the column + purpose of your letter<br>3 · Your point: topic sentence + information from Station A<br>4 · (Second point or) additional information from Station B<br>5 · Convincing concluding sentence<br>6 · Name, place of residence – no closing formula</p>`
+          :`<p>1 · Headline + hook<br>2 · Thesis<br>3 · Argument 1 (Station A) + evidence<br>4 · Argument 2 (Station B) + evidence<br>5 · Counter-argument + rebuttal<br>6 · Conclusion: what follows?</p>`}</div></details>
       </aside>
     </div>
   </section>
@@ -771,7 +839,7 @@ function exportText(withCode=true){
     const cards=[0,1,2].map(i=>S.card[id+"_"+i]).filter(Boolean); if(cards.length){ L.push("Expert card:"); cards.forEach(c=>L.push("• "+c)); }
     line(); });
   L.push(`== ${S.wt==="comment"?"COMMENT":"LETTER TO THE EDITOR"} (${words(S.text)} words) ==`);
-  if(S.head.trim()) L.push(S.head.trim()); L.push(S.text.trim()||"(not written yet)"); line();
+  if(S.head.trim()) L.push(S.head.trim()); L.push(S.text.trim()||"(not written yet)"); if(S.wt==="letter" && (S.sig||"").trim()){ line(); L.push(S.sig.trim()); } line();
   if(withCode){ L.push("== SAVE CODE (to continue later) =="); L.push(saveCode()); }
   return L.join("\n");
 }
@@ -1037,7 +1105,7 @@ function updWC(){ document.querySelectorAll("[data-wc]").forEach(el=>{ const w=w
 function afterRender(view){
   updWC();
   if(ST(view)){ const el=$("#viz-"+view); VIZ[view](el); }
-  if(view==="results"){ $("#fc-out").innerHTML=forecastHTML(); }
+  if(view==="results"){ $("#fc-out").innerHTML=forecastHTML(); if(window._goBonus){ window._goBonus=false; setTimeout(()=>$("#bonus")?.scrollIntoView(),50); } }
   if(view==="handin"){
     $("#preview").textContent=exportText(); $("#savecode").textContent=saveCode();
     $("#btn-mail").onclick=e=>{ e.preventDefault(); const body=exportText(false); const subj=`Midterms Lab – ${S.n||"student"}`;
@@ -1068,6 +1136,8 @@ document.addEventListener("change", e=>{
   if(t.dataset.feed!=null && t.tagName==="SELECT"){ S.feed[t.dataset.feed]=t.value; save(); }
 });
 document.addEventListener("click", e=>{
+  if(e.target.closest("[data-gobonus]")) window._goBonus=true;
+  const yt=e.target.closest("button[data-yt]"); if(yt){ const box=yt.closest(".vid"); box.innerHTML=`<iframe src="https://www.youtube-nocookie.com/embed/${yt.dataset.yt}?autoplay=1&rel=0" title="Video" style="width:100%;height:100%;border:0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`; return; }
   const b=e.target.closest("button,[data-phrase]"); if(!b) return;
   const y=window.scrollY;
   if(b.dataset.a){ S.a=b.dataset.a; if(S.b===S.a) S.b=null; if(S.c===S.a) S.c=null; save(); route(); window.scrollTo(0,y); }
