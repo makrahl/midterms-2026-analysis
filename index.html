@@ -244,7 +244,7 @@ td.num,th.num{text-align:right;font-family:var(--f-mono)}
   </footer>
 </div>
 
-<script src="results.js"></script>
+<script>document.write('<script src="results.js?t='+Date.now()+'"><\/script>');</script>
 <script>
 "use strict";
 /* =========================================================
@@ -511,7 +511,7 @@ function stepDone(id){
   if(id==="before") return doneScales("pre");
   if(id==="stations") return !!(S.a && S.b && stationStatus(S.a).done && stationStatus(S.b).done);
   if(id==="after") return doneScales("post");
-  if(id==="write") return words(S.text)>=250;
+  if(id==="write") return words(S.text)>=150;
   return false;
 }
 
@@ -520,13 +520,13 @@ function stepDone(id){
    ========================================================= */
 function route(){
   const h=(location.hash||"#start").slice(1);
-  const view = STATIONS.some(s=>s.id===h) ? h : (steps.some(s=>s.id===h)?h:"start");
+  const view = h==="teacher" ? "teacher" : STATIONS.some(s=>s.id===h) ? h : (steps.some(s=>s.id===h)?h:"start");
   const navId = view.startsWith("s") && ST(view) ? "stations" : view;
   $("#nav").innerHTML = steps.map(s=>`<a href="#${s.id}" ${s.id===navId?'aria-current="page"':""} class="${stepDone(s.id)?"done":""}"><span class="n">${s.n}</span>${esc(s.t)}</a>`).join("");
   $("#who").textContent = S.n ? `${S.n}${S.a?" · Station A: "+S.a.slice(1):""}` : "Not signed in";
   $("#rstatus").textContent = hasRes() ? `Results: ${R.status==="final"?"final":"as of "+(R.asOf||"–")}` : "Results: coming 5 Nov";
   $("#rstatus").className = "chip"+(hasRes()?" ok":" live");
-  const V = {start:vStart, before:()=>vScales("pre"), results:vResults, stations:vHub, after:()=>vScales("post"), write:vWrite, handin:vHandin};
+  const V = {start:vStart, before:()=>vScales("pre"), results:vResults, stations:vHub, after:()=>vScales("post"), write:vWrite, handin:vHandin, teacher:vTeacher};
   $("#app").innerHTML = ST(view) ? vStation(ST(view)) : V[view]();
   afterRender(view);
   window.scrollTo(0,0);
@@ -547,8 +547,8 @@ function vStart(){
       <div><b>2 · What happened</b>Results map, seats, newsticker – and your own forecast from the Forecast Lab.</div>
       <div><b>3 · Two stations</b>Station A (your number) + Station B (your choice). 3 tasks each from the pool.</div>
       <div><b>4 · Your view again</b>Same statements – has your view changed?</div>
-      <div><b>5 · Write</b>A comment (or letter to the editor), 250–350 words.</div>
-      <div><b>6 · Hand in</b>Send everything by email in one tap.</div>
+      <div><b>5 · Write</b>A comment (or letter to the editor), 150–200 words.</div>
+      <div><b>6 · Hand in</b>Copy your hand-in code and submit it the way your teacher asks.</div>
     </div>
     <p class="hint">Time: about 60–90 minutes. You can stop at any time – your work is saved in this browser, and your save code lets you continue on another device.</p>
   </section>
@@ -604,7 +604,7 @@ function vResults(){
         <p class="hint">${pending?"Before the election (Democrats incl. two independents).":"After the election."}</p></div>
       <div class="chamber stack tight"><div class="eyebrow">House · 435 seats · majority 218</div>${hemi([{k:"D",n:houC.D},{k:"tbd",n:houC.open},{k:"R",n:houC.R}],11,340)}
         <div class="tally"><span class="d">D ${houC.D}</span>${houC.open?`<span class="muted">open ${houC.open}</span>`:""}<span class="r">R ${houC.R}</span></div>
-        <p class="hint">${pending?"Before the election (2 seats vacant).":"After the election."}</p></div>
+        <p class="hint">${pending?"Before the election (2 seats vacant).":"Seats called so far."+(R.house?.proj?` Projected final result: <b>D ${R.house.proj.D} – R ${R.house.proj.R}</b> (${esc(R.house.proj.src)}).`:"")}</p></div>
     </div>
   </section>
   <section class="panel stack">
@@ -705,8 +705,8 @@ function forecastHTML(){
   if(!p) return `<div class="msg err">This does not look like a Forecast Lab code. It starts with “MT26.”</div>`;
   const picks=RACES.map(r=>{ const v=p.s?.[r.id], w=R.races?.[r.id]; const cls=!w?"open":(v===w?"hit":"miss"); return `<span class="pg ${cls}">${r.id} ${v||"–"}</span>`; }).join("");
   const called=RACES.filter(r=>R.races?.[r.id]); const right=called.filter(r=>p.s?.[r.id]===R.races[r.id]).length;
-  const hD = typeof R.house?.D==="number" && R.status!=="pending" ? R.house.D : null;
-  return `<div class="stack tight"><p><b>${esc(p.n||"Your")}</b> forecast · House: <span class="mono">D ${p.h}</span>${hD!=null?` · result so far: <span class="mono">D ${hD}</span> (difference ${Math.abs(p.h-hD)})`:""}</p>
+  const hD = R.status==="pending" ? null : (typeof R.house?.proj?.D==="number" ? R.house.proj.D : (typeof R.house?.D==="number" ? R.house.D : null));
+  return `<div class="stack tight"><p><b>${esc(p.n||"Your")}</b> forecast · House: <span class="mono">D ${p.h}</span>${hD!=null?` · projected result: <span class="mono">D ${hD}</span> (difference ${Math.abs(p.h-hD)})`:""}</p>
     <div>${picks}</div>
     <p class="hint">${called.length?`Senate battlegrounds called so far: ${called.length} of 11 – you got <b>${right}</b> right.`:"No battleground race has been called yet – the comparison appears with the results."}</p>
     ${p.r?`<p class="hint">Your reasoning on election day: <i>“${esc(p.r.slice(0,300))}${p.r.length>300?"…":""}”</i> – does it still hold?</p>`:""}</div>`;
@@ -788,7 +788,7 @@ const LETTER_HOW = `<p><b>Why people write letters to the editor:</b> they agree
 <p><b>Remember:</b> you want to convey a message to the editor and the readers – keep every argument focused on that message; avoid colloquial language and slang; use linking words.</p>
 <p class="hint">Based on your course sheet “Writing a letter to the editor”.</p>`;
 function vWrite(){
-  const w=words(S.text); const pct=Math.min(100,w/350*100); const L=S.wt==="letter";
+  const w=words(S.text); const pct=Math.min(100,w/200*100); const L=S.wt==="letter";
   const chk = L
    ? [["l_sal","Salutation “Sir or Madam,” – without “Dear”"],["l_ref","First paragraph: the column I am responding to + the purpose of my letter"],["l_pts","One clear point (two at most), each paragraph with a topic sentence"],["ev","Additional information from both of my stations, with sources"],["l_fair","Factual – no personal attack on the columnist"],["reg","Neutral/formal style, linking words, no slang or contractions"],["l_end","A convincing concluding sentence"],["l_sig","No closing formula – my name and place of residence at the end"]]
    : [["head","A headline that makes readers curious"],["thesis","A clear thesis in the first paragraph"],["ev","At least two pieces of evidence, each with its source"],["stations","Evidence from both of my stations"],["counter","A counter-argument that I take seriously and answer"],["concl","A conclusion that answers “what follows?”"],["reg","Formal register: no contractions, no “I think” in every sentence"]];
@@ -799,8 +799,8 @@ function vWrite(){
       <button type="button" data-wt="comment" aria-pressed="${!L}">Comment (op-ed)</button>
       <button type="button" data-wt="letter" aria-pressed="${L}">Letter to the editor</button>
     </div>
-    ${!L?`<div class="factbox"><b>Task:</b> An English-language news website for young Europeans asks for opinion pieces on the question <b>“Why did America vote the way it did – and what follows?”</b> Write a comment of <b>250–350 words</b>. Use evidence from both of your stations and refer to the results.</div>`
-     :`<div class="factbox"><b>Task:</b> Read the extract from a column below. Write a <b>letter to the editor</b> of <b>250–350 words</b> in which you respond to it. Use information from both of your stations and refer to the results.</div>
+    ${!L?`<div class="factbox"><b>Task:</b> An English-language news website for young Europeans asks for opinion pieces on the question <b>“Why did America vote the way it did – and what follows?”</b> Write a comment of <b>150–200 words</b>. Use evidence from both of your stations and refer to the results.</div>`
+     :`<div class="factbox"><b>Task:</b> Read the extract from a column below. Write a <b>letter to the editor</b> of <b>150–200 words</b> in which you respond to it. Use information from both of your stations and refer to the results.</div>
      <blockquote style="margin:0;padding:12px 16px;border-left:4px solid var(--ink);background:var(--bg);border-radius:0 8px 8px 0">
        <p class="eyebrow" style="margin-bottom:6px">Column · The Transatlantic Times · 5 November 2026</p>
        <p style="font-family:Georgia,serif;font-size:1.25rem;font-weight:700;margin-bottom:6px">Money and maps, not voters</p>
@@ -834,7 +834,7 @@ function vWrite(){
 /* ---------- Hand in ---------- */
 function exportText(withCode=true){
   const L=[]; const line=()=>L.push("");
-  L.push(`MIDTERMS 2026 ANALYSIS LAB – ${S.n||"(no name)"}`); L.push(`Exported: ${new Date().toLocaleString("en-GB")}`); line();
+  L.push(`MIDTERMS 2026 ANALYSIS LAB – ${S.n||"(no name)"}`); L.push(`Code created: ${new Date(S.ts||Date.now()).toLocaleString("en-GB")}`); line();
   L.push("== MY VIEW: BEFORE → AFTER (1 = strongly disagree … 5 = strongly agree) ==");
   SCALES.forEach(q=>L.push(`- ${q.t}  ${S.pre[q.id]||"–"} → ${S.post[q.id]||"–"}`));
   if(S.change.trim()){ L.push("Why my view changed / did not change:"); L.push(S.change.trim()); }
@@ -859,18 +859,84 @@ function vHandin(){
   const miss=[]; if(!S.n) miss.push("your name"); if(!doneScales("pre")) miss.push("“My view: before”");
   if(!(S.a&&stationStatus(S.a).done)) miss.push("Station A (3 tasks incl. AFB III, 25+ words each)");
   if(!(S.b&&stationStatus(S.b).done)) miss.push("Station B");
-  if(!doneScales("post")) miss.push("“My view: after”"); if(words(S.text)<250) miss.push(`your text (${words(S.text)}/250 words)`);
+  if(!doneScales("post")) miss.push("“My view: after”"); if(words(S.text)<150) miss.push(`your text (${words(S.text)}/150 words)`);
   return `<div class="stack"><section class="panel stack">
     <div class="sec-head"><span class="step">6</span><h2>Hand in</h2></div>
-    ${miss.length?`<div class="msg err"><b>Still missing:</b> ${miss.map(esc).join(" · ")}</div>`:`<div class="msg ok"><b>Everything is complete.</b> Send it to your teacher.</div>`}
-    <p>Tap <b>Open email</b>: your mail app opens with all your answers. Enter your teacher's email address and send. If the email is cut off or the button does not work, use <b>Copy my answers</b> and paste everything into an email.</p>
-    <div class="btns"><a class="btn primary" id="btn-mail" href="#">✉ Open email</a><button class="btn" id="btn-copyall">Copy my answers</button><span id="copy-msg" class="hint"></span></div>
+    ${miss.length?`<div class="msg err"><b>Still missing:</b> ${miss.map(esc).join(" · ")}</div>`:`<div class="msg ok"><b>Everything is complete.</b> Copy your hand-in code and submit it.</div>`}
+    <div class="how">
+      <div><b>1 · Copy</b>Tap “Copy my hand-in code”. The code is long – that is normal: it contains all your work.</div>
+      <div><b>2 · Submit</b>Paste the code where your teacher asked you to (e.g. the Moodle assignment). Do not change it.</div>
+      <div><b>3 · Keep it</b>The same code lets you continue on another device (Start → save code).</div>
+    </div>
+    <div class="btns"><button class="btn primary" id="btn-copycode">⧉ Copy my hand-in code</button><span id="code-msg" class="hint"></span></div>
+    <div class="codebox" id="savecode"></div>
+    <p class="hint">If copying does not work: tap into the box, select all, copy.</p>
   </section>
-  <section class="panel stack"><h3>Preview</h3><pre id="preview" style="white-space:pre-wrap;font-family:var(--f-mono);font-size:.8rem;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px;max-height:420px;overflow:auto;margin:0"></pre></section>
-  <section class="panel stack"><h3>Your save code</h3><p class="hint">Copy this code to continue on another device (Start → “Continue with a save code”). It contains all your answers.</p>
-    <div class="codebox" id="savecode"></div><div class="btns"><button class="btn small" id="btn-copycode">Copy save code</button><span id="code-msg" class="hint"></span></div>
-    <details class="wb"><summary>Start again from scratch</summary><p class="hint" style="margin:8px 0">Deletes everything on this device. Copy your save code first!</p><button class="btn small" id="btn-reset" style="color:var(--rep)">Delete my work on this device</button></details>
+  <section class="panel stack"><h3>Preview: what your teacher will see</h3><pre id="preview" style="white-space:pre-wrap;font-family:var(--f-mono);font-size:.8rem;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px;max-height:420px;overflow:auto;margin:0"></pre>
+    <div class="btns"><button class="btn small" id="btn-copyall">Copy as plain text</button><span id="copy-msg" class="hint"></span></div></section>
+  <section class="panel stack">
+    <details class="wb"><summary>Start again from scratch</summary><p class="hint" style="margin:8px 0">Deletes everything on this device. Copy your code first!</p><button class="btn small" id="btn-reset" style="color:var(--rep)">Delete my work on this device</button></details>
   </section></div>`;
+}
+
+/* ---------- Teacher page (#teacher): paste hand-in codes ---------- */
+const TKEY="ma26.teacher";
+let TCH = Object.assign({codes:"", anon:false, big:false}, ls.get(TKEY,{}));
+function parseAllCodes(text){
+  const out=[];
+  for(const part of String(text).split("MA26.").slice(1)){
+    const m=part.replace(/\s+/g,"").match(/^[A-Za-z0-9_-]+/); if(!m) continue;
+    for(let len=m[0].length; len>8; len--){ try{ const o=JSON.parse(b64dec(m[0].slice(0,len))); if(o && o.v===1){ out.push(Object.assign(blank(),o)); break; } }catch{} }
+  }
+  const by={}; out.forEach((o,i)=>{ const k=(o.n||"(no name) "+i).trim().toLowerCase(); if(!by[k] || (o.ts||0)>=(by[k].ts||0)) by[k]=o; });
+  return Object.values(by).sort((a,b)=>(a.n||"").localeCompare(b.n||""));
+}
+function withState(st, fn){ const keep=S; S=st; try{ return fn(); } finally { S=keep; } }
+const avg = a => a.length ? a.reduce((x,y)=>x+y,0)/a.length : null;
+function vTeacher(){
+  const P=parseAllCodes(TCH.codes);
+  const info=P.map(p=>withState(p,()=>({p, a:p.a, b:p.b, c:p.c, sa:p.a?stationStatus(p.a):null, sb:p.b?stationStatus(p.b):null, pre:doneScales("pre"), post:doneScales("post"), w:words(p.text),
+    complete: !!(p.n && doneScales("pre") && p.a && stationStatus(p.a).done && p.b && stationStatus(p.b).done && doneScales("post") && words(p.text)>=150)})));
+  const nm=(p,i)=>TCH.anon?`Student ${i+1}`:esc(p.n||"(no name)");
+  // opinion chart
+  const W=640, rowH=46, H=SCALES.length*rowH+40, L=250, Rr=20; const x=v=>L+(v-1)/4*(W-L-Rr);
+  let g=""; [1,2,3,4,5].forEach(v=>{ g+=`<line x1="${x(v)}" x2="${x(v)}" y1="14" y2="${H-26}" stroke="var(--line)"/><text x="${x(v)}" y="${H-10}" text-anchor="middle">${["strongly disagree","disagree","not sure","agree","strongly agree"][v-1].replace("strongly ","str. ")}</text>`; });
+  SCALES.forEach((q,i)=>{ const y=30+i*rowH; const a=avg(P.map(p=>p.pre[q.id]).filter(Boolean)), b=avg(P.map(p=>p.post[q.id]).filter(Boolean));
+    const t=q.t.length>44?q.t.slice(0,42)+"…":q.t; g+=`<text x="6" y="${y+4}" class="strong">${esc(t)}</text>`;
+    if(a!=null&&b!=null) g+=`<line x1="${x(a)}" x2="${x(b)}" y1="${y}" y2="${y}" stroke="var(--accent)" stroke-width="3"/>`;
+    if(a!=null) g+=`<circle cx="${x(a)}" cy="${y}" r="7" fill="var(--muted)"><title>before: ${a.toFixed(2)}</title></circle>`;
+    if(b!=null) g+=`<circle cx="${x(b)}" cy="${y}" r="7" fill="var(--accent)"><title>after: ${b.toFixed(2)}</title></circle>`;
+    if(a!=null&&b!=null) g+=`<text x="${W-4}" y="${y-10}" text-anchor="end">${a.toFixed(1)} → ${b.toFixed(1)}</text>`; });
+  const cov=STATIONS.map(s=>({s, A:P.filter(p=>p.a===s.id).length, B:P.filter(p=>p.b===s.id||p.c===s.id).length}));
+  const texts=P.map((p,i)=>({p,i})).filter(o=>words(o.p.text)>0);
+  return `<div class="stack">
+  <section class="panel stack">
+    <div class="sec-head"><span class="tag extra">teacher</span><h2>Teacher page</h2></div>
+    <p>Paste the hand-in codes of your students – as many as you like, in any format (e.g. a whole Moodle download or several emails). Codes start with <span class="mono">MA26.</span> If a student submits twice, the newest version counts.</p>
+    <textarea id="t-codes" style="min-height:110px" placeholder="MA26.…">${esc(TCH.codes)}</textarea>
+    <div class="btns"><button class="btn primary" id="t-load">Read codes</button><button class="btn small" id="t-clear">Clear</button>
+      <label class="hint"><input type="checkbox" id="t-anon" ${TCH.anon?"checked":""}> hide names (for the projector)</label>
+      <span class="hint">${P.length} student${P.length===1?"":"s"} loaded · stored only in this browser</span></div>
+  </section>
+  ${P.length?`
+  <section class="panel stack"><h3>Overview</h3><div class="tbl-wrap"><table><thead><tr><th>Student</th><th>Station A</th><th>Station B</th><th>extra</th><th>Views</th><th>Text</th><th>Complete</th></tr></thead><tbody>
+    ${info.map((o,i)=>`<tr><td>${nm(o.p,i)}</td><td>${o.a?ST(o.a).num+" "+(o.sa.done?"✓":o.sa.answered+"/3"):"–"}</td><td>${o.b?ST(o.b).num+" "+(o.sb.done?"✓":o.sb.answered+"/3"):"–"}</td><td>${o.c?ST(o.c).num:""}</td><td>${o.pre?"✓":"–"} / ${o.post?"✓":"–"}</td><td>${o.w} w · ${o.p.wt==="letter"?"letter":"comment"}</td><td>${o.complete?'<span class="tag done">✓</span>':'<span class="tag">open</span>'}</td></tr>`).join("")}
+  </tbody></table></div></section>
+  <section class="panel stack"><h3>How the class view changed</h3>
+    <div class="legend"><span><i style="background:var(--muted)"></i>before (average)</span><span><i style="background:var(--accent)"></i>after (average)</span></div>
+    <div class="chart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Average opinion before and after">${g}</svg></div>
+    <p class="hint">1 = strongly disagree … 5 = strongly agree. Statements: ${SCALES.map((q,i)=>`(${i+1}) ${esc(q.t)}`).join(" ")}</p></section>
+  <section class="panel stack"><h3>Stations covered</h3><div class="hbars">${cov.map(c=>`<div class="hb"><span>${c.s.num} · ${esc(c.s.short)}</span><div class="track" style="display:flex"><div class="bar" style="width:${c.A/Math.max(1,P.length)*100}%"></div><div class="bar" style="width:${c.B/Math.max(1,P.length)*100}%;background:var(--accent-soft);border-radius:0"></div></div><span class="v">A ${c.A} · B ${c.B}</span></div>`).join("")}</div>
+    <p class="hint">Dark = Station A (assigned), light = Station B or extra (chosen).</p></section>
+  <section class="panel stack" id="gallery"><div class="sec-head"><h3>Gallery: comments and letters</h3><button class="btn small" id="t-big">${TCH.big?"Normal view":"Projector view"}</button></div>
+    <div class="${TCH.big?"stack":"hub"}" style="${TCH.big?"font-size:1.35rem":""}">${texts.map(({p,i})=>`<article class="st-tile" style="min-height:0;cursor:default"><span class="eyebrow">${p.wt==="letter"?"Letter to the editor":"Comment"} · ${words(p.text)} words</span>
+      ${p.head.trim()?`<span class="t">${esc(p.head)}</span>`:""}<p style="white-space:pre-wrap;font-size:${TCH.big?"1.2rem":".92rem"}">${esc(p.text)}</p>
+      <span class="hint">${TCH.anon?"":esc(p.wt==="letter"&&p.sig?p.sig:p.n)}</span></article>`).join("")||'<p class="hint">No texts yet.</p>'}</div></section>
+  <section class="panel stack"><h3>All answers</h3>
+    <div class="btns"><button class="btn small" id="t-copyall">Copy everything as text</button><span id="t-msg" class="hint"></span></div>
+    ${P.map((p,i)=>`<details class="wb"><summary>${nm(p,i)}</summary><pre style="white-space:pre-wrap;font-family:var(--f-mono);font-size:.8rem;margin:8px 0 0">${esc(withState(p,()=>exportText(false)))}</pre></details>`).join("")}
+  </section>`:`<p class="hint">No codes loaded yet.</p>`}
+  </div>`;
 }
 
 /* =========================================================
@@ -914,21 +980,21 @@ function regress(){ const n=MIDTERMS.length; const mx=MIDTERMS.reduce((a,d)=>a+d
   let sxy=0,sxx=0; MIDTERMS.forEach(d=>{sxy+=(d[2]-mx)*(d[3]-my); sxx+=(d[2]-mx)**2;}); const b=sxy/sxx; return {b, a:my-b*mx}; }
 function vizS1(el){
   const W=640,H=340,L=46,B=36,T=14,Rm=14; const x=v=>L+(v-30)/(70-30)*(W-L-Rm), y=v=>T+(10-v)/(10+70)*(H-T-B);
-  const {a,b}=regress(); const res26 = (hasRes() && typeof R.house?.R==="number" && R.house.open===0) ? R.house.R-219 : (hasRes()&&typeof R.house?.R==="number"? R.house.R-219 : null);
+  const {a,b}=regress(); const res26 = !hasRes() ? null : (typeof R.house?.proj?.R==="number" ? R.house.proj.R-219 : (R.house?.open===0 && typeof R.house?.R==="number" ? R.house.R-219 : null));
   let g=""; for(let v=-60;v<=10;v+=10){ g+=`<line x1="${L}" x2="${W-Rm}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end">${v>0?"+":""}${v}</text>`; }
   for(let v=30;v<=70;v+=10){ g+=`<text x="${x(v)}" y="${H-B+18}" text-anchor="middle">${v}%</text>`; }
   g+=`<line x1="${x(50)}" x2="${x(50)}" y1="${T}" y2="${H-B}" stroke="var(--muted)" stroke-dasharray="3 3"/><text x="${x(50)+4}" y="${T+10}">50 % approval</text>`;
   g+=`<line x1="${x(30)}" y1="${y(a+b*30)}" x2="${x(70)}" y2="${y(a+b*70)}" stroke="var(--accent)" stroke-width="2" opacity=".55"/>`;
   g+=MIDTERMS.map((d,i)=>`<circle data-pt="${i}" cx="${x(d[2])}" cy="${y(d[3])}" r="7" fill="${["Truman","Kennedy","Johnson","Carter","Clinton","Obama","Biden"].includes(d[1])?"var(--dem)":"var(--rep)"}" opacity=".85" style="cursor:pointer"><title>${d[0]} ${d[1]}: ${d[2]} % approval, ${d[3]>0?"+":""}${d[3]} seats</title></circle>`).join("");
   g+=`<line x1="${x(35)}" x2="${x(35)}" y1="${T}" y2="${H-B}" stroke="var(--rep)" stroke-width="2" stroke-dasharray="5 4"/><text x="${x(35)+5}" y="${H-B-8}" class="strong">2026: ~35 %</text>`;
-  if(res26!=null) g+=`<rect x="${x(35)-8}" y="${y(res26)-8}" width="16" height="16" fill="var(--rep)" stroke="var(--ink)" stroke-width="2" transform="rotate(45 ${x(35)} ${y(res26)})"/><text x="${x(35)+12}" y="${y(res26)+4}" class="strong">2026 result: ${res26>0?"+":""}${res26}</text>`;
+  if(res26!=null) g+=`<rect x="${x(35)-8}" y="${y(res26)-8}" width="16" height="16" fill="var(--rep)" stroke="var(--ink)" stroke-width="2" transform="rotate(45 ${x(35)} ${y(res26)})"/><text x="${x(35)+12}" y="${y(res26)+4}" class="strong">2026: ${res26>0?"+":""}${res26}${R.house?.proj?" (projection)":""}</text>`;
   g+=`<text x="${L}" y="${H-4}">President's job approval before the midterm (Gallup) →</text><text transform="translate(12 ${T+150}) rotate(-90)" text-anchor="middle">House seats won/lost by President's party</text>`;
   el.innerHTML=`<h3>Approval and seat losses, 1946–2022</h3>
   <p class="hint">Each dot is one midterm (blue = Democratic President, red = Republican). The purple line is the trend. Tap a dot for details.</p>
   <div class="chart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Scatter plot of presidential approval and House seat changes in midterms">${g}</svg></div>
   <p id="pt-info" class="msg">Tap a dot.</p>
   <div class="stack tight"><label class="f"><span>Try it: what does the trend line predict for an approval of <b id="ap-v">35</b> %?</span><input type="range" id="ap" min="30" max="70" value="35"></label>
-  <p class="big" id="ap-out"></p><p class="hint">The trend line is a simple statistical estimate from 20 elections, not a forecast model. ${res26!=null?"The diamond shows the 2026 result so far (change from 219 Republican seats).":"The 2026 result is added on 5 November."}</p></div>
+  <p class="big" id="ap-out"></p><p class="hint">The trend line is a simple statistical estimate from 20 elections, not a forecast model. ${res26!=null?"The diamond shows 2026: change from 219 Republican seats before the election to the projected result.":"The 2026 result is added on 5 November."}</p></div>
   <p class="hint">Sources: Gallup (1946–2014 approval and seat changes); Gallup approval and House Clerk results for 2018 and 2022; 2026 approval: PollCheck average, 27 Oct 2026.</p>`;
   const upd=()=>{ const v=+$("#ap").value; $("#ap-v").textContent=v; const p=Math.round(a+b*v); $("#ap-out").textContent=`${p>0?"+":""}${p} seats`; };
   $("#ap").oninput=upd; upd();
@@ -1106,19 +1172,27 @@ const VIZ = {s1:vizS1, s2:vizS2, s3:vizS3, s4:vizS4, s5:vizS5, s6:vizS6, s7:vizS
    ========================================================= */
 function setPath(path, val){ const p=path.split("."); let o=S; for(let i=0;i<p.length-1;i++){ o=o[p[i]]=o[p[i]]||{}; } o[p[p.length-1]]=val; }
 function getPath(path){ return path.split(".").reduce((o,k)=>o?.[k], S); }
-function updWC(){ document.querySelectorAll("[data-wc]").forEach(el=>{ const w=words(getPath(el.dataset.wc)); const isText=el.dataset.wc==="text"; el.textContent = isText ? `${w} words · target 250–350` : `${w} word${w===1?"":"s"}${el.dataset.wc.startsWith("ans")&&w<25?" · at least 25":""}`; }); const m=$("#wmeter"); if(m) m.style.width=Math.min(100,words(S.text)/350*100)+"%"; }
+function updWC(){ document.querySelectorAll("[data-wc]").forEach(el=>{ const w=words(getPath(el.dataset.wc)); const isText=el.dataset.wc==="text"; el.textContent = isText ? `${w} words · target 150–200` : `${w} word${w===1?"":"s"}${el.dataset.wc.startsWith("ans")&&w<25?" · at least 25":""}`; }); const m=$("#wmeter"); if(m) m.style.width=Math.min(100,words(S.text)/200*100)+"%"; }
 
 function afterRender(view){
   updWC();
   if(ST(view)){ const el=$("#viz-"+view); VIZ[view](el); }
   if(view==="results"){ $("#fc-out").innerHTML=forecastHTML(); if(window._goBonus){ window._goBonus=false; setTimeout(()=>$("#bonus")?.scrollIntoView(),50); } }
   if(view==="handin"){
-    $("#preview").textContent=exportText(); $("#savecode").textContent=saveCode();
-    $("#btn-mail").onclick=e=>{ e.preventDefault(); const body=exportText(false); const subj=`Midterms Lab – ${S.n||"student"}`;
-      location.href=`mailto:?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(body)}`; };
-    $("#btn-copyall").onclick=()=>copyText(exportText(), $("#copy-msg"), "Copied – paste it into an email.");
-    $("#btn-copycode").onclick=()=>copyText(saveCode(), $("#code-msg"), "Save code copied.");
+    S.ts=Date.now(); save();
+    $("#preview").textContent=exportText(false); $("#savecode").textContent=saveCode();
+    $("#btn-copyall").onclick=()=>copyText(exportText(false), $("#copy-msg"), "Copied as plain text.");
+    $("#btn-copycode").onclick=()=>{ S.ts=Date.now(); save(); const c=saveCode(); $("#savecode").textContent=c; copyText(c, $("#code-msg"), "Copied – now paste it where your teacher asked you to."); };
     $("#btn-reset").onclick=()=>{ if(confirm("Really delete all your work on this device?")){ S=blank(); ls.set(KEY,S); location.hash="#start"; route(); } };
+  }
+  if(view==="teacher"){
+    const store=()=>ls.set(TKEY,TCH);
+    $("#t-load").onclick=()=>{ TCH.codes=$("#t-codes").value; store(); route(); };
+    $("#t-clear").onclick=()=>{ if(confirm("Remove all pasted codes from this browser?")){ TCH.codes=""; store(); route(); } };
+    $("#t-anon").onchange=e=>{ TCH.anon=e.target.checked; store(); const y=window.scrollY; route(); window.scrollTo(0,y); };
+    const big=$("#t-big"); if(big) big.onclick=()=>{ TCH.big=!TCH.big; store(); route(); setTimeout(()=>$("#gallery")?.scrollIntoView(),30); };
+    const ca=$("#t-copyall"); if(ca) ca.onclick=()=>copyText(parseAllCodes(TCH.codes).map(p=>withState(p,()=>exportText(false))).join("\n\n==========================\n\n"), $("#t-msg"), "Copied.");
+    $("#who").textContent="Teacher page";
   }
   if(view==="start"){
     $("#btn-load").onclick=()=>{ const o=decodeSave($("#load-code").value);
