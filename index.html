@@ -598,6 +598,7 @@ function vResults(){
     <div class="sec-head"><span class="step">2</span><h2>What happened on 3 November</h2></div>
     ${pending?`<div class="msg info"><b>Results are added on the morning of 5 November.</b> Until then you see the situation <i>before</i> the election.</div>`
       :`<div class="msg ${R.status==="final"?"ok":"info"}">${R.status==="final"?"Final results":"Results as of "+esc(R.asOf)+". Races that are still being counted are shown in grey – “not yet called” is a result too."}</div>`}
+    ${pending?"":`<p class="hint">Different media show slightly different numbers while votes are still being counted, because each newsroom calls races separately (AP, NBC, CNN …).${R.callSource?" This page uses "+esc(R.callSource)+" for seats already decided.":""}</p>`}
     <div class="cols2">
       <div class="chamber stack tight"><div class="eyebrow">Senate · 100 seats · majority 51 (or 50 + VP)</div>${hemi([{k:"D",n:senC.D},{k:"I",n:senC.I},{k:"tbd",n:senC.open},{k:"R",n:senC.R}],5,340)}
         <div class="tally"><span class="d">D ${senC.D}</span>${senC.I?`<span class="i">I ${senC.I}</span>`:""}${senC.open?`<span class="muted">open ${senC.open}</span>`:""}<span class="r">R ${senC.R}</span></div>

@@ -6,10 +6,12 @@
    ===================================================================== */
 window.RESULTS = {
   status: "partial",
-  asOf: "5 Nov 2026, 1:08 a.m. ET (7:08 a.m. German time)",
+  asOf: "5 Nov 2026, morning (German time)",
+  callSource: "AP race calls",
   sources: [
     {t:"NBC News: Senate results (5 Nov, 1:08 a.m. ET)", url:"https://www.nbcnews.com/politics/2026-elections/senate-results"},
-    {t:"NBC News: House results and Decision Desk projection (5 Nov, 1:08 a.m. ET)", url:"https://www.nbcnews.com/politics/2026-elections/house-results"},
+    {t:"House seats called: AP race calls as shown by The Washington Post (5 Nov, morning)", url:"https://www.washingtonpost.com/elections/results/2026/11/03/house/"},
+    {t:"NBC News: House projection by the NBC Decision Desk (5 Nov, 1:08 a.m. ET)", url:"https://www.nbcnews.com/politics/2026-elections/house-results"},
     {t:"NBC News: Governor results (5 Nov, 1:08 a.m. ET)", url:"https://www.nbcnews.com/politics/2026-elections/governor-results"},
     {t:"NBC News: Democrats clinch a majority of governorships", url:"https://nbcnews.com/politics/2026-election/democrats-flip-governorships-extending-party-inroads-red-states-rcna607010"},
     {t:"PBS NewsHour: AP Voter Poll – how key groups voted in 2026", url:"https://www.pbs.org/newshour/politics/ap-voter-poll-how-key-demographic-groups-voted-in-the-2026-midterms"},
@@ -26,7 +28,7 @@ window.RESULTS = {
 
   // Totals after the election (D incl. the independents who caucus with Democrats)
   senate: { D:54, R:44, I:0, open:2 },          // open: Alaska, Mississippi
-  house:  { D:242, R:151, open:42,              // seats called so far (NBC, 5 Nov, 1:08 a.m. ET)
+  house:  { D:240, R:147, open:48,              // seats called so far (AP via Washington Post, 5 Nov morning)
             proj: {D:259, R:176, src:"NBC News Decision Desk estimate"} },
   turnout: 49.4,                                // preliminary, % of eligible voters (McDonald)
 
@@ -47,7 +49,7 @@ window.RESULTS = {
   ],
 
   ticker: [
-    {t:"Thu 07:00", text:"<b>Morning update:</b> House count Democrats 242, Republicans 151, 42 seats still uncalled. NBC News now projects about 259–176 – a Democratic gain of more than 40 seats."},
+    {t:"Thu 07:00", text:"<b>Morning update:</b> House seats called by AP: Democrats 240, Republicans 147, 48 still uncalled. NBC News projects a final result of about 259–176 – a Democratic gain of more than 40 seats."},
     {t:"Thu 07:00", text:"Still open in the Senate: <b>Mississippi</b> (Colom, D, 49.0 % – Hyde-Smith, R, 48.9 %, 96 % counted) and <b>Alaska</b> (Peltola, D, 48.2 % – Sullivan, R, 47.9 %, 76 % counted). Senate stands at 54–44."},
     {t:"Thu 07:00", text:"Kansas governor race still too close to call: Holscher (D) 50.3 %, Masterson (R) 49.7 %."},
     {t:"Wed 12:30", text:"House count at midday Wednesday: Democrats 236, Republicans 146, 53 seats uncalled. The projected Democratic total (about 258–259) would be the most Democratic House seats since 1993."},
@@ -81,7 +83,7 @@ window.RESULTS = {
 <p><b>Realignment or protest?</b> Vance argued that many Trump 2024 voters did turn out – but voted Democratic. Use this as evidence in the sorter.</p>`,
     s4: `<p><b>The Texas map backfired:</b> drawn to win up to five more seats for Republicans, it delivered only one target, while Republicans lost two seats they already held (Texas Tribune; still counting). A political scientist called it “a dummymander instead of a gerrymander”.</p>
 <p><b>Turnout:</b> about <b>49.4 %</b> of eligible voters (preliminary) – the second-highest midterm turnout since 1914, close to 2018.</p>
-<p><b>Counting takes time:</b> 42 House seats were still uncalled early on Thursday; Alaska's House race may need a ranked-choice count on 18 November, and Mississippi's Senate race was separated by just 0.1 points (49.0 to 48.9 %).</p>`,
+<p><b>Counting takes time:</b> 48 House seats were still uncalled by AP early on Thursday; Alaska's House race may need a ranked-choice count on 18 November, and Mississippi's Senate race was separated by just 0.1 points (49.0 to 48.9 %).</p>`,
     s5: `<p><b>Where Republicans held:</b> Nebraska (Ricketts beat the independent Osborn by almost 7 points), Florida's Senate seat, and – still too close to call – Alaska and Mississippi. Several close House seats were also still open.</p>
 <p><b>The border</b> did not decide the vote: only about <b>1 in 10</b> voters named immigration as the top issue (AP Voter Poll).</p>
 <p><b>The Republican debate has begun:</b> Vance blames the Iran war, Trump fuel prices and his own absence from the ballot; other Republicans cite tariffs, the White House ballroom project and weak candidates. Which explanation is the most convincing – and which is the most convenient?</p>`,
