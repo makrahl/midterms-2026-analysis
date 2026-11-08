@@ -6,11 +6,13 @@
    ===================================================================== */
 window.RESULTS = {
   status: "partial",
-  asOf: "5 Nov 2026, morning (German time)",
+  asOf: "8 Nov 2026",
   callSource: "AP race calls",
   sources: [
     {t:"NBC News: Senate results (5 Nov, 1:08 a.m. ET)", url:"https://www.nbcnews.com/politics/2026-elections/senate-results"},
-    {t:"House seats called: AP race calls as shown by The Washington Post (5 Nov, morning)", url:"https://www.washingtonpost.com/elections/results/2026/11/03/house/"},
+    {t:"House seats called: AP race calls, as reported in Yahoo News live updates (8 Nov)", url:"https://www.yahoo.com/news/politics/live/midterms-2026-election-results-and-latest-updates-mississippi-votes-still-being-counted-in-senate-nail-biter-after-democrats-take-control-of-congress-200037541.html"},
+    {t:"NPR: Mississippi Senate results and provisional ballots (6 Nov)", url:"https://www.npr.org/2026/11/06/nx-s1-6030645/mississippi-senate-results-provisional-ballots"},
+    {t:"Kansas Reflector / KCTV: Kansas governor race still uncalled", url:"https://www.kctv5.com/2026/11/06/mail-in-ballots-set-arrive-kansas-governors-race-remains-uncalled/"},
     {t:"NBC News: House projection by the NBC Decision Desk (5 Nov, 1:08 a.m. ET)", url:"https://www.nbcnews.com/politics/2026-elections/house-results"},
     {t:"NBC News: Governor results (5 Nov, 1:08 a.m. ET)", url:"https://www.nbcnews.com/politics/2026-elections/governor-results"},
     {t:"NBC News: Democrats clinch a majority of governorships", url:"https://nbcnews.com/politics/2026-election/democrats-flip-governorships-extending-party-inroads-red-states-rcna607010"},
@@ -28,7 +30,7 @@ window.RESULTS = {
 
   // Totals after the election (D incl. the independents who caucus with Democrats)
   senate: { D:54, R:44, I:0, open:2 },          // open: Alaska, Mississippi
-  house:  { D:240, R:147, open:48,              // seats called so far (AP via Washington Post, 5 Nov morning)
+  house:  { D:254, R:162, open:19,              // seats called so far (AP, 8 Nov)
             proj: {D:259, R:176, src:"NBC News Decision Desk estimate"} },
   turnout: 49.4,                                // preliminary, % of eligible voters (McDonald)
 
@@ -45,13 +47,16 @@ window.RESULTS = {
     {st:"Michigan", winner:"D", name:"Jocelyn Benson", flip:false},
     {st:"Wisconsin", winner:"D", name:"David Crowley", flip:false},
     {st:"Pennsylvania", winner:"D", name:"Josh Shapiro (re-elected)", flip:false},
-    {st:"Kansas", winner:null, name:"too close to call: Holscher (D) 50.3 %, Masterson (R) 49.7 %", flip:false}
+    {st:"Kansas", winner:null, name:"not yet called: Holscher (D) leads by about 7,000 votes, hand-count audit", flip:false}
   ],
 
   ticker: [
-    {t:"Thu 07:00", text:"<b>Morning update:</b> House seats called by AP: Democrats 240, Republicans 147, 48 still uncalled. NBC News projects a final result of about 259–176 – a Democratic gain of more than 40 seats."},
-    {t:"Thu 07:00", text:"Still open in the Senate: <b>Mississippi</b> (Colom, D, 49.0 % – Hyde-Smith, R, 48.9 %, 96 % counted) and <b>Alaska</b> (Peltola, D, 48.2 % – Sullivan, R, 47.9 %, 76 % counted). Senate stands at 54–44."},
-    {t:"Thu 07:00", text:"Kansas governor race still too close to call: Holscher (D) 50.3 %, Masterson (R) 49.7 %."},
+    {t:"Sun 8 Nov", text:"<b>House (AP):</b> Democrats 254, Republicans 162, 19 seats still uncalled. Nationally, Democrats lead the House popular vote by about <b>12.8 points</b> (Cook Political Report, 7 Nov)."},
+    {t:"Sat 7 Nov", text:"<b>Mississippi:</b> Colom (D) leads Sen. Hyde-Smith (R) by 2,574 votes, 49.1 to 48.8 % (97 % counted). Mississippi is the only state with no recount procedure; mail ballots count if they arrive by 10 Nov."},
+    {t:"Sat 7 Nov", text:"<b>Alaska:</b> Peltola (D) leads Sen. Sullivan (R) by 637 votes (74 % counted). If no one passes 50 %, a ranked-choice count starts on 18 November."},
+    {t:"Fri 6 Nov", text:"<b>Kansas governor:</b> Holscher (D) leads Masterson (R) by about 7,000 votes; the narrow margin triggers a hand-count audit. Masterson has not conceded."},
+    {t:"Sun 8 Nov", text:"<b>What follows:</b> Republican Rep. Thomas Massie wants to force a House vote on impeaching Defense Secretary Pete Hegseth over the Iran war; Hakeem Jeffries says he will vote yes. Trump names Stephen Miller as his new chief of staff."},
+    {t:"Sun 8 Nov", text:"Trump on the Iran war and the midterms: <i>“If I had to do it again, I'd have to do it again.”</i>"},
     {t:"Wed 12:30", text:"House count at midday Wednesday: Democrats 236, Republicans 146, 53 seats uncalled. The projected Democratic total (about 258–259) would be the most Democratic House seats since 1993."},
     {t:"Wed", text:"Vice President JD Vance on X: <i>“The reason we lost is the war.”</i> Trump told the WSJ high fuel costs were the biggest factor and the war <i>“a piece of it”</i> – and told the NYT he would <i>“do that again”</i>."},
     {t:"Wed", text:"Texas “dummymander”: the 2025 map was drawn to win five more seats for Republicans – they flipped only one target and lost two seats of their own (Texas Tribune, counting continues)."},
@@ -83,7 +88,8 @@ window.RESULTS = {
 <p><b>Realignment or protest?</b> Vance argued that many Trump 2024 voters did turn out – but voted Democratic. Use this as evidence in the sorter.</p>`,
     s4: `<p><b>The Texas map backfired:</b> drawn to win up to five more seats for Republicans, it delivered only one target, while Republicans lost two seats they already held (Texas Tribune; still counting). A political scientist called it “a dummymander instead of a gerrymander”.</p>
 <p><b>Turnout:</b> about <b>49.4 %</b> of eligible voters (preliminary) – the second-highest midterm turnout since 1914, close to 2018.</p>
-<p><b>Counting takes time:</b> 48 House seats were still uncalled by AP early on Thursday; Alaska's House race may need a ranked-choice count on 18 November, and Mississippi's Senate race was separated by just 0.1 points (49.0 to 48.9 %).</p>`,
+<p><b>Votes vs. seats:</b> Democrats lead the national House vote by about <b>12.8 points</b> (Cook Political Report, 7 Nov). That puts the Democratic vote share most likely in the mid-50s, while the projected 259 of 435 seats would be about <b>60 per cent</b> of the House. First past the post usually gives the winning party a bigger share of seats than of votes – this time it worked against the party that had drawn the new maps.</p>
+<p><b>Counting takes time:</b> on 8 November, AP still had 19 House races uncalled. In Mississippi's Senate race (Colom ahead by 2,574 votes) there is <b>no recount procedure</b> at all; Alaska may need a ranked-choice count on 18 November.</p>`,
     s5: `<p><b>Where Republicans held:</b> Nebraska (Ricketts beat the independent Osborn by almost 7 points), Florida's Senate seat, and – still too close to call – Alaska and Mississippi. Several close House seats were also still open.</p>
 <p><b>The border</b> did not decide the vote: only about <b>1 in 10</b> voters named immigration as the top issue (AP Voter Poll).</p>
 <p><b>The Republican debate has begun:</b> Vance blames the Iran war, Trump fuel prices and his own absence from the ballot; other Republicans cite tariffs, the White House ballroom project and weak candidates. Which explanation is the most convincing – and which is the most convenient?</p>`,
