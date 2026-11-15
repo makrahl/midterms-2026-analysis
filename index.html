@@ -245,6 +245,7 @@ td.num,th.num{text-align:right;font-family:var(--f-mono)}
 </div>
 
 <script>document.write('<script src="results.js?t='+Date.now()+'"><\/script>');</script>
+<script>document.write('<script src="class-results.js?t='+Date.now()+'"><\/script>');</script>
 <script>
 "use strict";
 /* =========================================================
@@ -504,7 +505,8 @@ const steps = [
   {id:"stations", n:"3", t:"Stations"},
   {id:"after", n:"4", t:"My view: after"},
   {id:"write", n:"5", t:"Write"},
-  {id:"handin", n:"6", t:"Hand in"}
+  {id:"handin", n:"6", t:"Hand in"},
+  {id:"class", n:"7", t:"Class results"}
 ];
 function stepDone(id){
   if(id==="start") return !!(S.n && S.a);
@@ -526,7 +528,7 @@ function route(){
   $("#who").textContent = S.n ? `${S.n}${S.a?" · Station A: "+S.a.slice(1):""}` : "Not signed in";
   $("#rstatus").textContent = hasRes() ? `Results: ${R.status==="final"?"final":"as of "+(R.asOf||"–")}` : "Results: coming 5 Nov";
   $("#rstatus").className = "chip"+(hasRes()?" ok":" live");
-  const V = {start:vStart, before:()=>vScales("pre"), results:vResults, stations:vHub, after:()=>vScales("post"), write:vWrite, handin:vHandin, teacher:vTeacher};
+  const V = {start:vStart, before:()=>vScales("pre"), results:vResults, stations:vHub, after:()=>vScales("post"), write:vWrite, handin:vHandin, teacher:vTeacher, class:vClass};
   $("#app").innerHTML = ST(view) ? vStation(ST(view)) : V[view]();
   afterRender(view);
   window.scrollTo(0,0);
@@ -880,6 +882,68 @@ function vHandin(){
   </section></div>`;
 }
 
+/* ---------- Class results: encrypted, anonymous file (class-results.js) ---------- */
+const bytesToB64 = b => { let s=""; for(const x of b) s+=String.fromCharCode(x); return btoa(s); };
+const b64ToBytes = t => { const s=atob(t); const b=new Uint8Array(s.length); for(let i=0;i<s.length;i++) b[i]=s.charCodeAt(i); return b; };
+async function classKey(pw, salt){
+  const base=await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({name:"PBKDF2", salt, iterations:150000, hash:"SHA-256"}, base, {name:"AES-GCM", length:256}, false, ["encrypt","decrypt"]);
+}
+async function encryptClass(obj, pw){
+  const salt=crypto.getRandomValues(new Uint8Array(16)), iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=await crypto.subtle.encrypt({name:"AES-GCM", iv}, await classKey(pw,salt), new TextEncoder().encode(JSON.stringify(obj)));
+  return {v:1, salt:bytesToB64(salt), iv:bytesToB64(iv), data:bytesToB64(new Uint8Array(ct))};
+}
+async function decryptClass(f, pw){
+  const pt=await crypto.subtle.decrypt({name:"AES-GCM", iv:b64ToBytes(f.iv)}, await classKey(pw,b64ToBytes(f.salt)), b64ToBytes(f.data));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+function buildClassPayload(P){
+  const sc={}; SCALES.forEach(q=>{ sc[q.id]={pre:[0,0,0,0,0], post:[0,0,0,0,0]}; P.forEach(p=>{ if(p.pre[q.id]) sc[q.id].pre[p.pre[q.id]-1]++; if(p.post[q.id]) sc[q.id].post[p.post[q.id]-1]++; }); });
+  const st={}; STATIONS.forEach(s=>{ st[s.id]={A:P.filter(p=>p.a===s.id).length, B:P.filter(p=>p.b===s.id||p.c===s.id).length}; });
+  const texts=P.filter(p=>words(p.text)>0).map(p=>({wt:p.wt, head:p.head.trim(), text:p.text.trim()}));
+  for(let i=texts.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [texts[i],texts[j]]=[texts[j],texts[i]]; } // shuffle: no alphabetical order
+  return {v:1, created:Date.now(), n:P.length, scales:sc, stations:st, texts};
+}
+let CLS=null; // decrypted class results (memory only)
+const CPW="ma26.classpw";
+function opinionChart(getAvg, mine){
+  const W=640, rowH=46, H=SCALES.length*rowH+40, L=250, Rr=20; const x=v=>L+(v-1)/4*(W-L-Rr);
+  let g=""; [1,2,3,4,5].forEach(v=>{ g+=`<line x1="${x(v)}" x2="${x(v)}" y1="14" y2="${H-26}" stroke="var(--line)"/><text x="${x(v)}" y="${H-10}" text-anchor="middle">${["str. disagree","disagree","not sure","agree","str. agree"][v-1]}</text>`; });
+  SCALES.forEach((q,i)=>{ const y=30+i*rowH; const [a,b]=getAvg(q.id); const t=q.t.length>44?q.t.slice(0,42)+"…":q.t;
+    g+=`<text x="6" y="${y+4}" class="strong">${esc(t)}</text>`;
+    if(a!=null&&b!=null) g+=`<line x1="${x(a)}" x2="${x(b)}" y1="${y}" y2="${y}" stroke="var(--accent)" stroke-width="3"/>`;
+    if(a!=null) g+=`<circle cx="${x(a)}" cy="${y}" r="7" fill="var(--muted)"><title>before: ${a.toFixed(2)}</title></circle>`;
+    if(b!=null) g+=`<circle cx="${x(b)}" cy="${y}" r="7" fill="var(--accent)"><title>after: ${b.toFixed(2)}</title></circle>`;
+    if(mine && mine[q.id]) g+=`<rect x="${x(mine[q.id])-6}" y="${y-6}" width="12" height="12" fill="none" stroke="var(--rep)" stroke-width="2.5" transform="rotate(45 ${x(mine[q.id])} ${y})"><title>your answer (after)</title></rect>`;
+    if(a!=null&&b!=null) g+=`<text x="${W-4}" y="${y-10}" text-anchor="end">${a.toFixed(1)} → ${b.toFixed(1)}</text>`; });
+  return `<div class="chart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Average opinion before and after">${g}</svg></div>`;
+}
+const avgCounts = c => { const n=c.reduce((x,y)=>x+y,0); return n ? c.reduce((s,v,i)=>s+v*(i+1),0)/n : null; };
+function vClass(){
+  const F=window.CLASS_RESULTS;
+  const head=`<section class="panel stack"><div class="sec-head"><span class="step">7</span><h2>Class results</h2></div>`;
+  if(!F) return `<div class="stack">${head}<p>Your teacher will publish the results of the whole class here once everybody has handed in. Come back later!</p></section></div>`;
+  if(!CLS) return `<div class="stack">${head}<p>The class results are protected. Enter the password your teacher gave you.</p>
+    <div class="row" style="max-width:520px"><input type="text" id="c-pw" autocomplete="off" placeholder="Class password"><div style="flex:0 0 auto"><button class="btn primary" id="c-open">Show results</button></div></div><p id="c-msg" class="hint"></p></section></div>`;
+  const C=CLS, mine=doneScales("post")?S.post:null;
+  const cov=STATIONS.map(s=>({s, ...C.stations[s.id]}));
+  const flt=window._cflt||"all"; const texts=C.texts.filter(t=>flt==="all"||t.wt===flt);
+  return `<div class="stack">${head}
+    <p><b>${C.n}</b> students handed in · published ${new Date(C.created).toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"})} · all texts are anonymous.</p></section>
+  <section class="panel stack"><h3>How the class view changed</h3>
+    <div class="legend"><span><i style="background:var(--muted)"></i>class before (average)</span><span><i style="background:var(--accent)"></i>class after (average)</span>${mine?`<span><i style="background:none;border:2px solid var(--rep);border-radius:2px"></i>your answer (after)</span>`:""}</div>
+    ${opinionChart(id=>[avgCounts(C.scales[id].pre), avgCounts(C.scales[id].post)], mine)}
+    <p class="hint">1 = strongly disagree … 5 = strongly agree. Where did the class move most? Where are you different from the class – and why?</p></section>
+  <section class="panel stack"><h3>Stations covered</h3><div class="hbars">${cov.map(c=>`<div class="hb"><span>${c.s.num} · ${esc(c.s.short)}</span><div class="track" style="display:flex"><div class="bar" style="width:${c.A/Math.max(1,C.n)*100}%"></div><div class="bar" style="width:${c.B/Math.max(1,C.n)*100}%;background:var(--accent-soft);border-radius:0"></div></div><span class="v">${c.A+c.B}</span></div>`).join("")}</div>
+    <p class="hint">Dark = Station A (assigned), light = Station B or extra (chosen).</p></section>
+  <section class="panel stack"><div class="sec-head"><h3>Gallery: what the class wrote</h3>
+    <div class="seg">${[["all","All ("+C.texts.length+")"],["comment","Comments"],["letter","Letters to the editor"]].map(([k,l])=>`<button type="button" data-cflt="${k}" aria-pressed="${flt===k}">${l}</button>`).join("")}</div></div>
+    <p class="hint">Read at least three texts. Which argument convinced you most? Which text uses evidence best?</p>
+    <div class="hub">${texts.map(t=>`<article class="st-tile" style="min-height:0;cursor:default"><span class="eyebrow">${t.wt==="letter"?"Letter to the editor":"Comment"} · ${words(t.text)} words</span>${t.head?`<span class="t">${esc(t.head)}</span>`:""}<p style="white-space:pre-wrap;font-size:.94rem">${esc(t.text)}</p></article>`).join("")||'<p class="hint">No texts.</p>'}</div></section>
+  </div>`;
+}
+
 /* ---------- Teacher page (#teacher): paste hand-in codes ---------- */
 const TKEY="ma26.teacher";
 let TCH = Object.assign({codes:"", anon:false, big:false}, ls.get(TKEY,{}));
@@ -933,6 +997,22 @@ function vTeacher(){
     <div class="${TCH.big?"stack":"hub"}" style="${TCH.big?"font-size:1.35rem":""}">${texts.map(({p,i})=>`<article class="st-tile" style="min-height:0;cursor:default"><span class="eyebrow">${p.wt==="letter"?"Letter to the editor":"Comment"} · ${words(p.text)} words</span>
       ${p.head.trim()?`<span class="t">${esc(p.head)}</span>`:""}<p style="white-space:pre-wrap;font-size:${TCH.big?"1.2rem":".92rem"}">${esc(p.text)}</p>
       <span class="hint">${TCH.anon?"":esc(p.wt==="letter"&&p.sig?p.sig:p.n)}</span></article>`).join("")||'<p class="hint">No texts yet.</p>'}</div></section>
+  <section class="panel stack" id="share"><div class="sec-head"><span class="tag extra">for students</span><h3>Share with the class (tab 7 “Class results”)</h3></div>
+    <p>Creates an <b>anonymous, password-protected</b> file with the class view (before → after), the stations covered and <b>all ${texts.length} texts</b> – without names, in random order. Only people with the password can open it.</p>
+    <div class="row" style="max-width:640px"><label class="f">Class password (tell your students in class)<input type="text" id="t-pw" autocomplete="off" placeholder="e.g. a word from today's lesson" value="${esc(TCH.pw||"")}"></label></div>
+    <div class="btns"><button class="btn primary" id="t-make">Create class results file</button><span id="t-mkmsg" class="hint"></span></div>
+    <div id="t-made" hidden class="stack tight">
+      <div class="msg ok"><b>Done.</b> Now upload the file to GitHub – it replaces the old one:</div>
+      <ol style="margin:0;padding-left:20px;font-size:.94rem">
+        <li>Tap <b>Download class-results.js</b>.</li>
+        <li>Open <a href="https://github.com/makrahl/midterms-2026-analysis/upload/main" target="_blank" rel="noopener">github.com/makrahl/midterms-2026-analysis/upload/main</a> (signed in as makrahl).</li>
+        <li>Drag the file into the box (or “choose your files”) and tap <b>Commit changes</b>.</li>
+        <li>After 1–2 minutes your students see the results under <b>7 · Class results</b> with the password.</li>
+      </ol>
+      <div class="btns"><a class="btn primary" id="t-dl" download="class-results.js">⤓ Download class-results.js</a><button class="btn small" id="t-copyfile">Copy file content</button><span id="t-cfmsg" class="hint"></span></div>
+      <p class="hint">To update later (e.g. after late hand-ins): paste all codes again, create the file again, upload again. To remove the results for students, upload the file from this button: <button class="btn small" id="t-empty">Download empty file</button></p>
+    </div>
+  </section>
   <section class="panel stack"><h3>All answers</h3>
     <div class="btns"><button class="btn small" id="t-copyall">Copy everything as text</button><span id="t-msg" class="hint"></span></div>
     ${P.map((p,i)=>`<details class="wb"><summary>${nm(p,i)}</summary><pre style="white-space:pre-wrap;font-family:var(--f-mono);font-size:.8rem;margin:8px 0 0">${esc(withState(p,()=>exportText(false)))}</pre></details>`).join("")}
@@ -1186,7 +1266,20 @@ function afterRender(view){
     $("#btn-copycode").onclick=()=>{ S.ts=Date.now(); save(); const c=saveCode(); $("#savecode").textContent=c; copyText(c, $("#code-msg"), "Copied – now paste it where your teacher asked you to."); };
     $("#btn-reset").onclick=()=>{ if(confirm("Really delete all your work on this device?")){ S=blank(); ls.set(KEY,S); location.hash="#start"; route(); } };
   }
+  if(view==="class"){
+    const open=async(pw,silent)=>{ try{ CLS=await decryptClass(window.CLASS_RESULTS, pw); try{ localStorage.setItem(CPW,pw); }catch{} route(); }catch{ CLS=null; if(!silent){ const m=$("#c-msg"); if(m) m.textContent="Wrong password – try again."; } } };
+    const b=$("#c-open"); if(b){ b.onclick=()=>open($("#c-pw").value.trim(),false); $("#c-pw").onkeydown=e=>{ if(e.key==="Enter") open($("#c-pw").value.trim(),false); };
+      let saved=null; try{ saved=localStorage.getItem(CPW); }catch{} if(saved) open(saved,true); }
+  }
   if(view==="teacher"){
+    const mk=$("#t-make");
+    if(mk){ const fileText=f=>"/* Midterms 2026 Analysis Lab – class results (encrypted). Created on the teacher page. */\nwindow.CLASS_RESULTS = "+(f?JSON.stringify(f):"null")+";\n";
+      const offer=txt=>{ const url=URL.createObjectURL(new Blob([txt],{type:"text/javascript"})); $("#t-dl").href=url; $("#t-made").hidden=false; $("#t-copyfile").onclick=()=>copyText(txt,$("#t-cfmsg"),"Copied."); };
+      mk.onclick=async()=>{ const pw=$("#t-pw").value.trim(); if(pw.length<4){ $("#t-mkmsg").textContent="Please choose a password with at least 4 characters."; return; }
+        TCH.pw=pw; ls.set(TKEY,TCH); $("#t-mkmsg").textContent="Encrypting …";
+        try{ const f=await encryptClass(buildClassPayload(parseAllCodes(TCH.codes)), pw); offer(fileText(f)); $("#t-mkmsg").textContent=""; }catch(e){ $("#t-mkmsg").textContent="This browser cannot encrypt here (needs https)."; } };
+      $("#t-empty").onclick=()=>{ const url=URL.createObjectURL(new Blob([fileText(null)],{type:"text/javascript"})); const a=document.createElement("a"); a.href=url; a.download="class-results.js"; a.click(); };
+    }
     const store=()=>ls.set(TKEY,TCH);
     $("#t-load").onclick=()=>{ TCH.codes=$("#t-codes").value; store(); route(); };
     $("#t-clear").onclick=()=>{ if(confirm("Remove all pasted codes from this browser?")){ TCH.codes=""; store(); route(); } };
@@ -1226,6 +1319,7 @@ document.addEventListener("click", e=>{
   else if(b.dataset.role){ const [r,id]=b.dataset.role.split(":"); if(r==="b") S.b=id; if(r==="c") S.c=id; if(r==="x"){ if(S.b===id){ S.b=S.c; S.c=null; } else if(S.c===id) S.c=null; } save(); route(); window.scrollTo(0,y); }
   else if(b.dataset.wt){ S.wt=b.dataset.wt; save(); route(); window.scrollTo(0,y); }
   else if(b.dataset.sort){ const [st,i,k]=b.dataset.sort.split(":"); S.sort[st+"_"+i]=k; save(); b.parentElement.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", x===b)); }
+  else if(b.dataset.cflt){ window._cflt=b.dataset.cflt; route(); window.scrollTo(0,y); }
   else if(b.dataset.phrase){ copyText(b.dataset.phrase, $("#ph-msg"), "Copied: “"+b.dataset.phrase+"”"); }
 });
 
