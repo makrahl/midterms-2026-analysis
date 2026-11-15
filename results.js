@@ -6,11 +6,15 @@
    ===================================================================== */
 window.RESULTS = {
   status: "partial",
-  asOf: "8 Nov 2026",
+  asOf: "15 Nov 2026",
   callSource: "AP race calls",
   sources: [
     {t:"NBC News: Senate results (5 Nov, 1:08 a.m. ET)", url:"https://www.nbcnews.com/politics/2026-elections/senate-results"},
-    {t:"House seats called: AP race calls, as reported in Yahoo News live updates (8 Nov)", url:"https://www.yahoo.com/news/politics/live/midterms-2026-election-results-and-latest-updates-mississippi-votes-still-being-counted-in-senate-nail-biter-after-democrats-take-control-of-congress-200037541.html"},
+    {t:"House seats called: AP race calls, as reported by Yahoo News (13 Nov)", url:"https://www.yahoo.com/news/politics/article/lots-of-2026-midterm-races-havent-been-called-yet-heres-where-things-stand-right-now-235850171.html"},
+    {t:"NPR: Mississippi Senate – Democrat Scott Colom wins (11 Nov)", url:"https://www.npr.org/2026/11/11/g-s1-151688/mississippi-senate-race-scott-colom"},
+    {t:"Kansas Reflector: Democrat Cindy Holscher wins Kansas governor's race (12 Nov)", url:"https://kansasreflector.com/2026/11/12/democrat-cindy-holscher-wins-kansas-governors-race/"},
+    {t:"Anchorage Daily News: Alaska Senate count", url:"https://www.adn.com/politics/2026/11/10/peltola-adds-to-lead-over-sullivan-after-large-batch-of-ballots-drop-but-alaskas-senate-race-is-still-tight/"},
+    {t:"NPR: House votes to effectively end the impeachment effort against Hegseth (10 Nov)", url:"https://www.npr.org/2026/11/10/nx-s1-6036813/house-votes-to-effectively-end-the-impeachment-effort-against-pete-hegseth"},
     {t:"NPR: Mississippi Senate results and provisional ballots (6 Nov)", url:"https://www.npr.org/2026/11/06/nx-s1-6030645/mississippi-senate-results-provisional-ballots"},
     {t:"Kansas Reflector / KCTV: Kansas governor race still uncalled", url:"https://www.kctv5.com/2026/11/06/mail-in-ballots-set-arrive-kansas-governors-race-remains-uncalled/"},
     {t:"NBC News: House projection by the NBC Decision Desk (5 Nov, 1:08 a.m. ET)", url:"https://www.nbcnews.com/politics/2026-elections/house-results"},
@@ -29,8 +33,8 @@ window.RESULTS = {
   before: { senate: {D:47, R:53}, house: {D:214, R:219, vacant:2} },
 
   // Totals after the election (D incl. the independents who caucus with Democrats)
-  senate: { D:54, R:44, I:0, open:2 },          // open: Alaska, Mississippi
-  house:  { D:254, R:162, open:19,              // seats called so far (AP, 8 Nov)
+  senate: { D:55, R:44, I:0, open:1 },          // open: Alaska
+  house:  { D:256, R:168, open:11,              // AP, 13 Nov: D 256, 11 uncalled; R = 435 - 256 - 11 (derived)
             proj: {D:259, R:176, src:"NBC News Decision Desk estimate"} },
   turnout: 49.4,                                // preliminary, % of eligible voters (McDonald)
 
@@ -47,16 +51,17 @@ window.RESULTS = {
     {st:"Michigan", winner:"D", name:"Jocelyn Benson", flip:false},
     {st:"Wisconsin", winner:"D", name:"David Crowley", flip:false},
     {st:"Pennsylvania", winner:"D", name:"Josh Shapiro (re-elected)", flip:false},
-    {st:"Kansas", winner:null, name:"not yet called: Holscher (D) leads by about 7,000 votes, hand-count audit", flip:false}
+    {st:"Kansas", winner:"D", name:"Cindy Holscher (called 12 Nov, 50.3 – 49.7 %)", flip:false}
   ],
 
   ticker: [
-    {t:"Sun 8 Nov", text:"<b>House (AP):</b> Democrats 254, Republicans 162, 19 seats still uncalled. Nationally, Democrats lead the House popular vote by about <b>12.8 points</b> (Cook Political Report, 7 Nov)."},
-    {t:"Sat 7 Nov", text:"<b>Mississippi:</b> Colom (D) leads Sen. Hyde-Smith (R) by 2,574 votes, 49.1 to 48.8 % (97 % counted). Mississippi is the only state with no recount procedure; mail ballots count if they arrive by 10 Nov."},
-    {t:"Sat 7 Nov", text:"<b>Alaska:</b> Peltola (D) leads Sen. Sullivan (R) by 637 votes (74 % counted). If no one passes 50 %, a ranked-choice count starts on 18 November."},
-    {t:"Fri 6 Nov", text:"<b>Kansas governor:</b> Holscher (D) leads Masterson (R) by about 7,000 votes; the narrow margin triggers a hand-count audit. Masterson has not conceded."},
-    {t:"Sun 8 Nov", text:"<b>What follows:</b> Republican Rep. Thomas Massie wants to force a House vote on impeaching Defense Secretary Pete Hegseth over the Iran war; Hakeem Jeffries says he will vote yes. Trump names Stephen Miller as his new chief of staff."},
-    {t:"Sun 8 Nov", text:"Trump on the Iran war and the midterms: <i>“If I had to do it again, I'd have to do it again.”</i>"},
+    {t:"Sat 14 Nov", text:"<b>Alaska:</b> Mary Peltola (D) now leads Sen. Dan Sullivan (R) 49.8 to 46.1 % with 96 % counted – more than 10,000 votes. If she stays below 50 %, ranked-choice counting follows after 18 November. A win would give Democrats 56 seats."},
+    {t:"Fri 13 Nov", text:"<b>House (AP):</b> Democrats 256 seats, 11 races still uncalled – two of them in Louisiana go to a runoff on 12 December. NBC still projects about 259–176."},
+    {t:"Thu 12 Nov", text:"<b>Kansas:</b> AP calls the governor's race for Democrat Cindy Holscher (50.3 to 49.7 %). Republican Ty Masterson concedes: <i>“It looks like we will come up just short.”</i>"},
+    {t:"Wed 11 Nov", text:"<b>Mississippi:</b> AP calls the Senate race for Democrat Scott Colom; Sen. Cindy Hyde-Smith concedes. Colom is the first Black senator from Mississippi since Reconstruction. Democrats now hold 55 Senate seats – a net gain of eight."},
+    {t:"Tue 10 Nov", text:"The House votes 211–204 to send the articles of impeachment against Defense Secretary Hegseth to committee, which effectively ends the effort for now. Eleven Democrats missed the vote; Democrats say they may try again when they take over in January."},
+    {t:"Sun 8 Nov", text:"Trump on the Iran war and the midterms: <i>“If I had to do it again, I'd have to do it again.”</i> He names Stephen Miller as his new chief of staff."},
+    {t:"Sat 7 Nov", text:"Nationally, Democrats lead the House popular vote by about <b>12.8 points</b> (Cook Political Report)."},
     {t:"Wed 12:30", text:"House count at midday Wednesday: Democrats 236, Republicans 146, 53 seats uncalled. The projected Democratic total (about 258–259) would be the most Democratic House seats since 1993."},
     {t:"Wed", text:"Vice President JD Vance on X: <i>“The reason we lost is the war.”</i> Trump told the WSJ high fuel costs were the biggest factor and the war <i>“a piece of it”</i> – and told the NYT he would <i>“do that again”</i>."},
     {t:"Wed", text:"Texas “dummymander”: the 2025 map was drawn to win five more seats for Republicans – they flipped only one target and lost two seats of their own (Texas Tribune, counting continues)."},
@@ -78,7 +83,7 @@ window.RESULTS = {
 
   notes: {
     s1: `<p><b>AP Voter Poll:</b> about 6 in 10 voters disapproved of Trump. About <b>4 in 10</b> said their vote was meant to express <b>opposition</b> to him, just under <b>2 in 10 support</b> – and about 4 in 10 said he was <b>not a factor</b>.</p>
-<p><b>Seats:</b> NBC News projects about 176 Republican House seats, compared with 219 before the election – a loss of roughly <b>40</b>, close to Gallup's average of 37 for unpopular presidents (see the diamond in the chart). In the Senate, Republicans lost seven seats net.</p>
+<p><b>Seats:</b> NBC News projects about 176 Republican House seats, compared with 219 before the election – a loss of roughly <b>40</b>, close to Gallup's average of 37 for unpopular presidents (see the diamond in the chart). In the Senate, Republicans lost eight seats net (Alaska still open).</p>
 <p><b>Trump's own explanation</b> (NYT interview): Republicans lost because he was not on the ballot. Compare this with his strategy “pretend I'm on the ballot”.</p>`,
     s2: `<p><b>Top issue:</b> about <b>4 in 10</b> voters named the economy as the most important issue facing the country (AP Voter Poll); roughly half called the <b>cost of living</b> “crucial” to their vote – about 6 in 10 among voters with incomes under $50,000.</p>
 <p><b>Explanations from the losing side:</b> Trump told the Wall Street Journal that <b>high fuel costs</b> were the biggest factor; Vice President Vance blamed <b>the Iran war</b> (“The reason we lost is the war”). Other Republicans pointed to tariffs.</p>
@@ -89,13 +94,13 @@ window.RESULTS = {
     s4: `<p><b>The Texas map backfired:</b> drawn to win up to five more seats for Republicans, it delivered only one target, while Republicans lost two seats they already held (Texas Tribune; still counting). A political scientist called it “a dummymander instead of a gerrymander”.</p>
 <p><b>Turnout:</b> about <b>49.4 %</b> of eligible voters (preliminary) – the second-highest midterm turnout since 1914, close to 2018.</p>
 <p><b>Votes vs. seats:</b> Democrats lead the national House vote by about <b>12.8 points</b> (Cook Political Report, 7 Nov). That puts the Democratic vote share most likely in the mid-50s, while the projected 259 of 435 seats would be about <b>60 per cent</b> of the House. First past the post usually gives the winning party a bigger share of seats than of votes – this time it worked against the party that had drawn the new maps.</p>
-<p><b>Counting takes time:</b> on 8 November, AP still had 19 House races uncalled. In Mississippi's Senate race (Colom ahead by 2,574 votes) there is <b>no recount procedure</b> at all; Alaska may need a ranked-choice count on 18 November.</p>`,
-    s5: `<p><b>Where Republicans held:</b> Nebraska (Ricketts beat the independent Osborn by almost 7 points), Florida's Senate seat, and – still too close to call – Alaska and Mississippi. Several close House seats were also still open.</p>
+<p><b>Counting takes time:</b> ten days after the election, AP still had 11 House races uncalled; two Louisiana seats go to a runoff on 12 December. Mississippi's Senate race was only called on 11 November – in a state with <b>no recount procedure</b> at all – and Alaska may need a ranked-choice count after 18 November.</p>`,
+    s5: `<p><b>Where Republicans held:</b> Nebraska (Ricketts beat the independent Osborn by almost 7 points) and Florida's Senate seat. They lost Mississippi narrowly (Hyde-Smith conceded on 11 November), Sen. Sullivan trails in Alaska, and the Kansas governorship stayed Democratic. In the House, Republicans lead in only a few of the last uncalled seats.</p>
 <p><b>The border</b> did not decide the vote: only about <b>1 in 10</b> voters named immigration as the top issue (AP Voter Poll).</p>
 <p><b>The Republican debate has begun:</b> Vance blames the Iran war, Trump fuel prices and his own absence from the ballot; other Republicans cite tariffs, the White House ballroom project and weak candidates. Which explanation is the most convincing – and which is the most convenient?</p>`,
     s6: `<p><b>Careful:</b> there are no reliable data yet on how much online campaigning changed the result. What we do know: the group that uses social media most – voters under 30 – swung furthest towards the Democrats (about 7 in 10, AP Voter Poll), but they made up only about <b>1 in 10</b> voters.</p>
 <p>Trump's direct-to-followers strategy (“pretend I'm on the ballot” vlogs) did not prevent heavy losses; afterwards he said Republicans lost because he was not on the ballot. Discuss: does that show the limits of a personal online brand?</p>`,
-    s7: `<p><b>Money vs. result:</b> Elon Musk's largest donation ($158 million) went to the main Republican Senate super PAC – Republicans still lost seven Senate seats net. A super PAC he funded with $10 million backed <b>Ken Paxton</b> in Texas, who lost by about <b>12 points</b>.</p>
+    s7: `<p><b>Money vs. result:</b> Elon Musk's largest donation ($158 million) went to the main Republican Senate super PAC – Republicans still lost at least eight Senate seats net. A super PAC he funded with $10 million backed <b>Ken Paxton</b> in Texas, who lost by about <b>12 points</b>.</p>
 <p>In his victory speech, Talarico presented his win as a victory of the people over big money (see the bonus video).</p>
 <p><b>But:</b> research suggests money matters most in low-profile races and primaries. In a national wave, it may simply not be enough. Results for the AI and crypto super PACs' candidates are not yet analysed.</p>`
   }
